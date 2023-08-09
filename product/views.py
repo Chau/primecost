@@ -12,6 +12,7 @@ class DishListView(ListView):
 
 
 class IngredientCreateView(CreateView):
+    success_url = '/ingredient/create'
     model = Ingredient
     fields = ('name', 'description', 'unit', 'price')
     # form_class = IngredientForm

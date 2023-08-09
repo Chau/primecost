@@ -4,10 +4,10 @@ from glossary.models import MeasurementUnit
 
 
 class Ingredient(models.Model):
-    name = models.CharField(max_length=64)
-    unit = models.ForeignKey(MeasurementUnit, on_delete=models.PROTECT)
-    description = models.TextField(null=True, blank=True)
-    price = models.DecimalField(max_digits=5, decimal_places=2)
+    name = models.CharField(max_length=64, verbose_name='Наименование')
+    unit = models.ForeignKey(MeasurementUnit, on_delete=models.PROTECT, verbose_name='Единица измерения')
+    description = models.TextField(null=True, blank=True, verbose_name='Описание')
+    price = models.DecimalField(max_digits=5, decimal_places=2, verbose_name='Цена в рублях за единицу')
 
 
 class Dish(models.Model):
