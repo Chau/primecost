@@ -11,6 +11,12 @@ class DishListView(ListView):
     model = Dish
 
 
+class DishCreateView(CreateView):
+    success_url = '/dish/list'
+    model = Dish
+    fields = ('name', 'description', 'ingredient')
+
+
 class IngredientCreateView(CreateView):
     success_url = '/ingredient/create'
     model = Ingredient

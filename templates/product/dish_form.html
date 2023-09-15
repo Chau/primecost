@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+{% endblock %}
+
+{% block title %}Создать новое блюдо{% endblock %}
+
+{% load bootstrap %}
+
+{% block body %}
+<!--modal-->
+    <div class="modal fade" id="addIngredientModal" tabindex="-1" aria-labelledby="addIngredientModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="addIngredientModalLabel">Добавьте ингредиент</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+          </div>
+          <form>
+            <div class="modal-body">
+                <select class="form-select w-50" aria-label="Ингредиент" style="" id="selectIngredient">
+                  <option selected>-----------------</option>
+                  <option value="1">Яйцо</option>
+                  <option value="2">Мука</option>
+                  <option value="3">Сахар</option>
+                </select>
+                <input type="text" class="form-control" placeholder="количество" aria-label="количество" id="ingredientAmount">
+                <select class="form-select" aria-label="измерение" id="selectIngredientDimension">
+                  <option selected value="1">миллилитры</option>
+                  <option value="2">литры</option>
+                </select>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-primary"  id="btnAdd">Добавить</button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+          </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  <!--end modal-->
+{% endblock %}
+
+{% block content %}
+
+  <form method="post">
+    {% csrf_token %}
+
+      <div class="mb-3">
+        <label for="dishName" class="form-label">Наименование блюда</label>
+        <input type="text" class="form-control" id="dishName" >
+      </div>
+      <div class="mb-3">
+        <label for="dishDescr" class="form-label">Описание</label>
+        <textarea class="form-control" id="dishDescr" rows="5"></textarea>
+      </div>
+
+      <div class="input-group mb-3">
+      <span class="input-group-text" id="basic-addon1">ингредиенты</span>
+      <button type="button" class="btn btn-outline-secondary"  data-bs-toggle="modal" data-bs-target="#addIngredientModal">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"></path>
+          </svg>
+      </button>
+      </div>
+      <div class="mb-3" id="ingredientsList">
+        <div class="d-none" id="ingredientItem-0">
+          <div class="input-group mb-3">
+            <input type="text" class="form-control" id="ingredientName-0">
+            <input type="text" class="form-control" id="ingredientAmount-0">
+            <input type="text" class="form-control" id="ingredientDimension-0">
+          </div>
+        </div>
+      </div>
+
+   <!--   <div class="input-group mb-3 d-none" id="ingredientChoice">
+        <select class="form-select w-50" aria-label="Ингредиент" style="">
+          <option selected>-----------------</option>
+          <option value="1">Яйцо</option>
+          <option value="2">Мука</option>
+          <option value="3">Сахар</option>
+        </select>
+        <input type="text" class="form-control" placeholder="количество" aria-label="количество">
+        <select class="form-select" aria-label="измерение">
+          <option selected>миллилитры</option>
+          <option value="1">литры</option>
+        </select>
+        <button type="button" class="btn btn-outline-secondary">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"></path>
+          </svg>
+        </button>
+        <button type="button" class="btn btn-outline-secondary">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+            <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+            <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+          </svg>
+        </button>-->
+<!--
+         <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">измерение</button>
+         <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="#">миллилитры</a></li>
+            <li><a class="dropdown-item" href="#">литры</a></li>
+          </ul>
+         <input type="text" class="form-control" aria-label="количество">-->
+     <!-- </div>-->
+
+    <button type="submit" class="btn btn-success">Сохранить</button>
+  </form>
+
+<script>
+  const ingredientModal = document.getElementById('addIngredientModal');
+  const modal = new bootstrap.Modal(ingredientModal);
+  let ingredientId = 0;
+
+  document.getElementById("btnAdd").addEventListener("click", function () {
+    let ingredientName = document.getElementById('selectIngredient');
+    let ingredientAmount = document.getElementById('ingredientAmount');
+    let ingredientDimension = document.getElementById('selectIngredientDimension');
+    // close modal
+    modal.hide();
+    //increment id for ingredient controls
+    ingredientId = ingredientId + 1;
+    // add new ingredient to the ingredient list
+    let ingredientsList = document.getElementById('ingredientsList');
+    let ingredientItem = ingredientsList.querySelector('#ingredientItem-0');
+    let newIngredientItem = ingredientItem.cloneNode(true);
+    newIngredientItem.id = `ingredientItem-${ingredientId}`;
+    newIngredientItem.setAttribute('class', 'visible');
+    // modify ingredientName input
+    let newIngredientName = newIngredientItem.querySelector('#ingredientName-0');
+    newIngredientName.value = ingredientName.selectedOptions[0].label;
+    newIngredientName.id = `ingredientName-${ingredientId}` ;
+    // modify ingredientAmount input
+    let newIngredientAmount = newIngredientItem.querySelector('#ingredientAmount-0');
+    newIngredientAmount.value = ingredientAmount.value;
+    newIngredientAmount.id = `ingredientAmount-${ingredientId}`;
+    // modify ingredientDimension input
+    let newIngredientDimension = newIngredientItem.querySelector('#ingredientDimension-0');
+    newIngredientDimension.value = ingredientDimension.selectedOptions[0].label;
+    newIngredientDimension.id = `ingredientDimension-${ingredientId}`;
+
+    ingredientsList.appendChild(newIngredientItem);
+  });
+
+</script>
+{% endblock %}
