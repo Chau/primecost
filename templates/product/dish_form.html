@@ -27,8 +27,8 @@
                 </select>
                 <input type="text" class="form-control" placeholder="количество" aria-label="количество" id="ingredientAmount">
                 <select class="form-select form-control" aria-label="измерение" id="selectIngredientDimension">
-                  <option selected value="1">миллилитры</option>
-                  <option value="2">литры</option>
+<!--                  <option selected value="1">миллилитры</option>-->
+<!--                  <option value="2">литры</option>-->
                 </select>
             </div>
             <div class="modal-footer">
@@ -81,16 +81,28 @@
   const modal = new bootstrap.Modal(ingredientModal);
   let ingredientId = 0;
   let modalIsShown = 0;
-  let ingredientsJson = [];
+  let ingredientsDict = {};
   let selectIngredientName = document.getElementById('selectIngredient');
+  let selectIngredientDimension = document.getElementById('selectIngredientDimension');
 
   selectIngredientName.addEventListener('change', function(e) {
-    alert('1');
+    // add dimensions dynamically
+    while (selectIngredientDimension.options.length > 0){
+        selectIngredientDimension.remove(0);
+    };
+
+    let dimensions = ingredientsDict[this.value]['dimensions'];
+    for (i = 0;i < dimensions.length;i++){
+        let option = document.createElement("option");
+        option.text = dimensions[i]['name'];
+        option.value = dimensions[i]['id'];
+        selectIngredientDimension.add(option);
+    };
   });
 
   ingredientModal.addEventListener('show.bs.modal', function(e) {
       if (modalIsShown == 1) {return};
-      ingredientsJson = [
+      let ingredientsJson = [
         {
           'name': 'яйцо',
           'id': '1',
@@ -115,9 +127,10 @@
       ];
      // let selectIngredientName = document.getElementById('selectIngredient');
      for (let i = 0; i < ingredientsJson.length; i++){
+        ingredientsDict[ingredientsJson[i]['id']] = ingredientsJson[i];
         let option = document.createElement("option");
         option.text = ingredientsJson[i]['name'];
-        option.value = ingredientsJson[i]['value'];
+        option.value = ingredientsJson[i]['id'];
         selectIngredientName.add(option);
      };
     modalIsShown = 1;
