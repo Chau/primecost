@@ -26,7 +26,7 @@
 <!--                  <option value="3">Сахар</option>-->
                 </select>
                 <input type="text" class="form-control" placeholder="количество" aria-label="количество" id="ingredientAmount">
-                <select class="form-select form-control" aria-label="измерение" id="selectIngredientDimension">
+                <select class="form-select form-control" aria-label="измерение" id="selectIngredientUnit">
 <!--                  <option selected value="1">миллилитры</option>-->
 <!--                  <option value="2">литры</option>-->
                 </select>
@@ -69,7 +69,7 @@
           <div class="input-group mb-3">
             <input type="text" class="form-control" id="ingredientName-0">
             <input type="text" class="form-control" id="ingredientAmount-0">
-            <input type="text" class="form-control" id="ingredientDimension-0">
+            <input type="text" class="form-control" id="ingredientUnit-0">
           </div>
         </div>
       </div>
@@ -83,63 +83,54 @@
   let modalIsShown = 0;
   let ingredientsDict = {};
   let selectIngredientName = document.getElementById('selectIngredient');
-  let selectIngredientDimension = document.getElementById('selectIngredientDimension');
+  let selectIngredientUnit = document.getElementById('selectIngredientUnit');
 
   selectIngredientName.addEventListener('change', function(e) {
-    // add dimensions dynamically
-    while (selectIngredientDimension.options.length > 0){
-        selectIngredientDimension.remove(0);
+    // add units dynamically
+    while (selectIngredientUnit.options.length > 0){
+        selectIngredientUnit.remove(0);
     };
 
-    let dimensions = ingredientsDict[this.value]['dimensions'];
-    for (i = 0;i < dimensions.length;i++){
+    let units = ingredientsDict[this.value]['units'];
+    for (i = 0;i < units.length;i++){
         let option = document.createElement("option");
-        option.text = dimensions[i]['name'];
-        option.value = dimensions[i]['id'];
-        selectIngredientDimension.add(option);
+        option.text = units[i]['name'];
+        option.value = units[i]['id'];
+        selectIngredientUnit.add(option);
     };
   });
 
   ingredientModal.addEventListener('show.bs.modal', function(e) {
       if (modalIsShown == 1) {return};
-      let ingredientsJson = [
-        {
-          'name': 'яйцо',
-          'id': '1',
-          'dimensions': [{'name': 'шт', 'value': 'piece', 'id': 1}]
-        },
-        {
-          'name': 'мука',
-          'id': 2,
-           'dimensions': [
-                            {'name': 'грамм', 'value': 'g', 'id': 2},
-                            {'name': 'килограмм', 'value': 'kg', 'id': 3}
-                          ]
-        },
-        {
-          'name': 'сахар',
-          'id': 3,
-          'dimensions': [
-                            {'name': 'грамм', 'value': 'g', 'id': 2},
-                            {'name': 'килограмм', 'value': 'kg', 'id': 3}
-                          ]
-        }
-      ];
-     // let selectIngredientName = document.getElementById('selectIngredient');
-     for (let i = 0; i < ingredientsJson.length; i++){
-        ingredientsDict[ingredientsJson[i]['id']] = ingredientsJson[i];
-        let option = document.createElement("option");
-        option.text = ingredientsJson[i]['name'];
-        option.value = ingredientsJson[i]['id'];
-        selectIngredientName.add(option);
-     };
-    modalIsShown = 1;
+      // ajax
+      const requestURL = '/ingredient/list_json';
+      const xhr = new XMLHttpRequest();
+      xhr.responseType = 'json';
+      xhr.open('GET', requestURL);
+      xhr.onload = () => {
+          if (xhr.status !== 200) {
+            return;
+          }
+          ingredientsJson = xhr.response;
+          console.log(ingredientsJson);
+          console.log(ingredientsJson.length);
+          for (let i = 0; i < ingredientsJson.length; i++){
+            ingredientsDict[ingredientsJson[i]['id']] = ingredientsJson[i];
+            console.log(ingredientsDict);
+            let option = document.createElement("option");
+            option.text = ingredientsJson[i]['name'];
+            option.value = ingredientsJson[i]['id'];
+            selectIngredientName.add(option);
+         };
+          modalIsShown = 1;
+      }
+      xhr.send();
   });
 
   document.getElementById("btnAdd").addEventListener("click", function () {
     let ingredientName = document.getElementById('selectIngredient');
     let ingredientAmount = document.getElementById('ingredientAmount');
-    let ingredientDimension = document.getElementById('selectIngredientDimension');
+    let ingredientUnit = document.getElementById('selectIngredientUnit');
     // close modal
     modal.hide();
     //increment id for ingredient controls
@@ -158,10 +149,10 @@
     let newIngredientAmount = newIngredientItem.querySelector('#ingredientAmount-0');
     newIngredientAmount.value = ingredientAmount.value;
     newIngredientAmount.id = `ingredientAmount-${ingredientId}`;
-    // modify ingredientDimension input
-    let newIngredientDimension = newIngredientItem.querySelector('#ingredientDimension-0');
-    newIngredientDimension.value = ingredientDimension.selectedOptions[0].label;
-    newIngredientDimension.id = `ingredientDimension-${ingredientId}`;
+    // modify ingredientUnit input
+    let newIngredientUnit = newIngredientItem.querySelector('#ingredientUnit-0');
+    newIngredientUnit.value = ingredientUnit.selectedOptions[0].label;
+    newIngredientUnit.id = `ingredientUnit-${ingredientId}`;
 
     ingredientsList.appendChild(newIngredientItem);
   });

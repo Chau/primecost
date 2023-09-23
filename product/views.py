@@ -1,5 +1,6 @@
 from django.shortcuts import render
-from django.views.generic import ListView, CreateView, UpdateView
+from django.http import JsonResponse
+from django.views.generic import ListView, CreateView, UpdateView, View
 
 from .models import Dish, Ingredient
 # from .forms import IngredientForm
@@ -15,6 +16,35 @@ class DishCreateView(CreateView):
     success_url = '/dish/list'
     model = Dish
     fields = ('name', 'description', 'ingredient')
+
+
+class IngredientListJsonView(View):
+    def dispatch(self, request, *args, **kwargs):
+        ingredients_json = [
+            {
+              'name': 'яйцо',
+              'id': '1',
+              'units': [{'name': 'шт', 'value': 'piece', 'id': 1}]
+            },
+            {
+              'name': 'мука',
+              'id': 2,
+              'units': [
+                                {'name': 'грамм', 'value': 'g', 'id': 2},
+                                {'name': 'килограмм', 'value': 'kg', 'id': 3}
+                              ]
+            },
+            {
+              'name': 'сахар',
+              'id': 3,
+              'units': [
+                                {'name': 'грамм', 'value': 'g', 'id': 2},
+                                {'name': 'килограмм', 'value': 'kg', 'id': 3}
+                              ]
+            }
+          ]
+        return JsonResponse(ingredients_json, safe=False)
+
 
 
 class IngredientCreateView(CreateView):
