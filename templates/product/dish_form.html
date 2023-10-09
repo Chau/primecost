@@ -6,9 +6,8 @@
 
 {% block title %}Создать новое блюдо{% endblock %}
 
-{% load bootstrap %}
-
 {% block body %}
+{% load bootstrap %}
 <!--modal-->
     <div class="modal fade" id="addIngredientModal" tabindex="-1" aria-labelledby="addIngredientModalLabel" aria-hidden="true">
       <div class="modal-dialog">
@@ -44,16 +43,16 @@
 
 {% block content %}
 
-  <form method="post">
+  <form method="POST" action="{% url 'dish_create' %}">
     {% csrf_token %}
 
       <div class="mb-3">
         <label for="dishName" class="form-label">Наименование блюда</label>
-        <input type="text" class="form-control" id="dishName" >
+        <input type="text" class="form-control" id="dishName" name="name">
       </div>
       <div class="mb-3">
         <label for="dishDescr" class="form-label">Описание</label>
-        <textarea class="form-control" id="dishDescr" rows="5"></textarea>
+        <textarea class="form-control" id="dishDescr" name="id_description" rows="5"></textarea>
       </div>
 
       <div class="input-group mb-3">
@@ -64,12 +63,19 @@
           </svg>
       </button>
       </div>
+      {{ ingredient_formset.management_form }}
       <div class="mb-3" id="ingredientsList">
-        <div class="d-none" id="ingredientItem-0">
+        <div id="ingredientItem-0"> <!-- class="d-none" -->
           <div class="input-group mb-3">
-            <input type="text" class="form-control" id="ingredientName-0">
+              {% for ingredient_form in ingredient_formset %}
+              {{ ingredient_form|bootstrap_horizontal }}
+              <!--  {{ ingredient_form.ingredient_name|bootstrap }}
+                {{ ingredient_form.ingredient_amount|bootstrap }}
+                {{ ingredient_form.ingredient_unit|bootstrap }} -->
+              {% endfor %}
+           <!-- <input type="text" class="form-control" id="ingredientName-0">
             <input type="text" class="form-control" id="ingredientAmount-0">
-            <input type="text" class="form-control" id="ingredientUnit-0">
+            <input type="text" class="form-control" id="ingredientUnit-0"> -->
           </div>
         </div>
       </div>
@@ -79,24 +85,26 @@
 <script>
   const ingredientModal = document.getElementById('addIngredientModal');
   const modal = new bootstrap.Modal(ingredientModal);
-  let ingredientId = 0;
+  let ingredientNum = 0;
   let modalIsShown = 0;
   let ingredientsDict = {};
-  let selectIngredientName = document.getElementById('selectIngredient');
-  let selectIngredientUnit = document.getElementById('selectIngredientUnit');
+  let ingredientName = document.getElementById('selectIngredient');
+  let ingredientAmount = document.getElementById('ingredientAmount');
+  let ingredientUnit = document.getElementById('selectIngredientUnit');
 
-  selectIngredientName.addEventListener('change', function(e) {
+  ingredientName.addEventListener('change', function(e) {
     // add units dynamically
-    while (selectIngredientUnit.options.length > 0){
-        selectIngredientUnit.remove(0);
+    while (ingredientUnit.options.length > 0){
+        ingredientUnit.remove(0);
     };
+    ingredientAmount.value = '';
 
     let units = ingredientsDict[this.value]['units'];
     for (i = 0;i < units.length;i++){
         let option = document.createElement("option");
         option.text = units[i]['name'];
         option.value = units[i]['id'];
-        selectIngredientUnit.add(option);
+        ingredientUnit.add(option);
     };
   });
 
@@ -120,7 +128,7 @@
             let option = document.createElement("option");
             option.text = ingredientsJson[i]['name'];
             option.value = ingredientsJson[i]['id'];
-            selectIngredientName.add(option);
+            ingredientName.add(option);
          };
           modalIsShown = 1;
       }
@@ -128,33 +136,48 @@
   });
 
   document.getElementById("btnAdd").addEventListener("click", function () {
-    let ingredientName = document.getElementById('selectIngredient');
-    let ingredientAmount = document.getElementById('ingredientAmount');
-    let ingredientUnit = document.getElementById('selectIngredientUnit');
+   // let ingredientName = document.getElementById('selectIngredient');
+  //  let ingredientAmount = document.getElementById('ingredientAmount');
+  //  let ingredientUnit = document.getElementById('selectIngredientUnit');
     // close modal
     modal.hide();
-    //increment id for ingredient controls
-    ingredientId = ingredientId + 1;
+    // get ingredient id for controls
+
+    ingredientNum = ingredientNum + 1
     // add new ingredient to the ingredient list
     let ingredientsList = document.getElementById('ingredientsList');
     let ingredientItem = ingredientsList.querySelector('#ingredientItem-0');
     let newIngredientItem = ingredientItem.cloneNode(true);
-    newIngredientItem.id = `ingredientItem-${ingredientId}`;
+    newIngredientItem.id = `ingredientItem-${ingredientNum}`;
     newIngredientItem.setAttribute('class', 'visible');
+    // modify ingredient id in hidden input
+    ingredientId = ingredientName.selectedOptions[0].value;
+    let newIngredientId = newIngredientItem.querySelector('#ingredientId');
+    newIngredientId.value = ingredientId
+    newIngredientId.name = `form-${ingredientNum}-ingredient_id`;
     // modify ingredientName input
-    let newIngredientName = newIngredientItem.querySelector('#ingredientName-0');
+    let newIngredientName = newIngredientItem.querySelector('#ingredientName');
     newIngredientName.value = ingredientName.selectedOptions[0].label;
-    newIngredientName.id = `ingredientName-${ingredientId}` ;
+    newIngredientName.id = `ingredientName-${ingredientNum}`;
+    newIngredientName.name = `form-${ingredientNum}-ingredient_name`;
     // modify ingredientAmount input
-    let newIngredientAmount = newIngredientItem.querySelector('#ingredientAmount-0');
+    let newIngredientAmount = newIngredientItem.querySelector('#ingredientAmount');
     newIngredientAmount.value = ingredientAmount.value;
-    newIngredientAmount.id = `ingredientAmount-${ingredientId}`;
+    newIngredientAmount.id = `ingredientAmount-${ingredientNum}`;
+    newIngredientAmount.name = `form-${ingredientNum}-ingredient_amount`;
+
     // modify ingredientUnit input
-    let newIngredientUnit = newIngredientItem.querySelector('#ingredientUnit-0');
+    let newIngredientUnit = newIngredientItem.querySelector('#ingredientUnit');
     newIngredientUnit.value = ingredientUnit.selectedOptions[0].label;
-    newIngredientUnit.id = `ingredientUnit-${ingredientId}`;
+    newIngredientUnit.id = `ingredientUnit-${ingredientNum}`;
+    newIngredientUnit.name = `form-${ingredientNum}-ingredient_unit`;
 
     ingredientsList.appendChild(newIngredientItem);
+
+    // increment total forms. Its needed for django formset
+    let totalFormInput = document.getElementById('id_form-TOTAL_FORMS');
+    totalFormInput.value = Number(totalFormInput.value) + 1;
+
   });
 
 </script>
