@@ -18,12 +18,11 @@ from django.contrib import admin
 from django.urls import path
 
 from product.views import DishListView, DishCreateView, IngredientCreateView, IngredientUpdateView, \
-    ingredient_list_json, dish_create_view
+    ingredient_list_json
 
 urlpatterns = [
     path('dish/list', DishListView.as_view(), name='dish_list'),
-    # path('dish/create', DishCreateView.as_view(), name='dish_create'),
-    path('dish/create', dish_create_view, name='dish_create'),
+    path('dish/create', DishCreateView.as_view(), name='dish_create'),
     path('ingredient/list_json', ingredient_list_json),
     path('ingredient/create', IngredientCreateView.as_view(), name='ingredient_create'),
     path('ingredient/<int:pk>/update', IngredientUpdateView.as_view()),

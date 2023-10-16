@@ -65,7 +65,7 @@
       </div>
       {{ ingredient_formset.management_form }}
       <div class="mb-3" id="ingredientsList">
-        <div id="ingredientItem-0"> <!-- class="d-none" -->
+        <div class="d-none" id="ingredientItem-0">
           <div class="input-group mb-3">
               {% for ingredient_form in ingredient_formset %}
               {{ ingredient_form|bootstrap_horizontal }}
@@ -136,13 +136,9 @@
   });
 
   document.getElementById("btnAdd").addEventListener("click", function () {
-   // let ingredientName = document.getElementById('selectIngredient');
-  //  let ingredientAmount = document.getElementById('ingredientAmount');
-  //  let ingredientUnit = document.getElementById('selectIngredientUnit');
     // close modal
-    modal.hide();
+    // modal.hide();
     // get ingredient id for controls
-
     ingredientNum = ingredientNum + 1
     // add new ingredient to the ingredient list
     let ingredientsList = document.getElementById('ingredientsList');
