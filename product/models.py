@@ -1,6 +1,7 @@
 import typing as t
 
 from django.db import models
+from django.utils.functional import cached_property
 
 from glossary.models import MeasurementUnit
 
@@ -38,7 +39,10 @@ class Dish(models.Model):
     # TODO: rename to 'ingredients'
     ingredient = models.ManyToManyField(Ingredient, through='DishIngredient', verbose_name='Ингридиенты')
 
-    def save_ingredients(self, ingredients_data: t.List[t.Dict]):
+    def get_absolute_url(self):
+        return '/dish/{}'.format(self.pk)
+
+    def save_ingredients(self, ingredients_data: t.List[t.Dict]) -> None:
         """
         Save ingredients of dish to DishIngredient model.
         Example of ingredients_data:
@@ -65,6 +69,17 @@ class Dish(models.Model):
             DishIngredient.objects.update_or_create(
                 dish=self, ingredient=ingredient, defaults={'amount': ingredient_item['ingredient_amount']}
             )
+
+    @cached_property
+    def total(self) -> float:
+        """
+        Count total cost of dish
+        :return:
+        """
+        total_sum = 0
+        for dish_ingredient in self.dishingredient_set.all():
+            total_sum += dish_ingredient.amount * float(dish_ingredient.ingredient.price)
+        return total_sum
 
 
 class DishIngredient(models.Model):

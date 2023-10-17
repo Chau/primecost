@@ -1,7 +1,7 @@
 
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
-from django.views.generic import ListView, CreateView, UpdateView, TemplateView
+from django.views.generic import ListView, CreateView, UpdateView, TemplateView, DetailView
 
 from .models import Dish, Ingredient
 from .forms import DishForm, IngredientFormset
@@ -12,6 +12,10 @@ from .forms import DishForm, IngredientFormset
 def ingredient_list_json(request):
     ingredients_json = Ingredient.search_ingredient()
     return JsonResponse(ingredients_json, safe=False)
+
+
+class DishDetailView(DetailView):
+    model = Dish
 
 
 class DishListView(ListView):
@@ -32,7 +36,7 @@ class DishCreateView(TemplateView):
             dish = dish_form.dish_save(ingredient_formset.cleaned_data)
         # TODO: change to dish with argument dish_id
         # TODO: show errors if not valid
-        return redirect('dish_list')
+        return redirect(dish)
 
 
 class IngredientCreateView(CreateView):

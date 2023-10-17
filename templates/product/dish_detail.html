@@ -1,10 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'base.html' %}
 
-</body>
-</html>
+{% block content %}
+<h3>{{ dish.name }}</h3>
+<p class="lead">{{ dish.description }}</p>
+<h5>Ингредиенты</h5>
+<ul class="list-group">
+  {% for dish_ingredient in dish.dishingredient_set.all %}
+  <li class="list-group-item">{{ dish_ingredient.ingredient.name }}, {{ dish_ingredient.amount }} {{ dish_ingredient.ingredient.unit.full_name }}</li>
+  {% endfor %}
+</ul>
+<p>Итого: {{ dish.total }} р.</p>
+{% endblock %}

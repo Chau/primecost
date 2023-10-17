@@ -18,9 +18,10 @@ from django.contrib import admin
 from django.urls import path
 
 from product.views import DishListView, DishCreateView, IngredientCreateView, IngredientUpdateView, \
-    ingredient_list_json
+    DishDetailView, ingredient_list_json
 
 urlpatterns = [
+    path('dish/<int:pk>', DishDetailView.as_view(), name='dish_detail'),
     path('dish/list', DishListView.as_view(), name='dish_list'),
     path('dish/create', DishCreateView.as_view(), name='dish_create'),
     path('ingredient/list_json', ingredient_list_json),
