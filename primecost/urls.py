@@ -17,15 +17,17 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-from product.views import DishListView, DishCreateView, IngredientCreateView, IngredientUpdateView, \
-    DishDetailView, ingredient_list_json
+from product.views import (DishDetailView, DishListView, DishCreateView,
+                           IngredientListView, IngredientCreateView, IngredientUpdateView,
+                           ingredient_list_json)
 
 urlpatterns = [
     path('dish/<int:pk>', DishDetailView.as_view(), name='dish_detail'),
     path('dish/list', DishListView.as_view(), name='dish_list'),
     path('dish/create', DishCreateView.as_view(), name='dish_create'),
+    path('ingredient/list', IngredientListView.as_view(), name='ingredient_list'),
     path('ingredient/list_json', ingredient_list_json),
     path('ingredient/create', IngredientCreateView.as_view(), name='ingredient_create'),
-    path('ingredient/<int:pk>/update', IngredientUpdateView.as_view()),
+    path('ingredient/<int:pk>/update', IngredientUpdateView.as_view(), name='ingredient_update'),
     path('admin/', admin.site.urls),
 ]

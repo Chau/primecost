@@ -39,6 +39,14 @@ class DishCreateView(TemplateView):
         return redirect(dish)
 
 
+class IngredientListView(ListView):
+    model = Ingredient
+    context_object_name = 'ingredients'
+
+    def get_queryset(self):
+        return Ingredient.objects.select_related().all()
+
+
 class IngredientCreateView(CreateView):
     success_url = '/ingredient/create'
     model = Ingredient
