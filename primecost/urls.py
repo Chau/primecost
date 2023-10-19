@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import path
 
 from product.views import (DishDetailView, DishListView, DishCreateView,
-                           IngredientListView, IngredientCreateView, IngredientUpdateView,
+                           IngredientListView, IngredientDetailView, IngredientCreateView, IngredientUpdateView,
                            ingredient_list_json)
 
 urlpatterns = [
@@ -27,6 +27,7 @@ urlpatterns = [
     path('dish/create', DishCreateView.as_view(), name='dish_create'),
     path('ingredient/list', IngredientListView.as_view(), name='ingredient_list'),
     path('ingredient/list_json', ingredient_list_json),
+    path('ingredient/<int:pk>', IngredientDetailView.as_view(), name='ingredient_detail'),
     path('ingredient/create', IngredientCreateView.as_view(), name='ingredient_create'),
     path('ingredient/<int:pk>/update', IngredientUpdateView.as_view(), name='ingredient_update'),
     path('admin/', admin.site.urls),

@@ -47,6 +47,10 @@ class IngredientListView(ListView):
         return Ingredient.objects.select_related().all()
 
 
+class IngredientDetailView(DetailView):
+    model = Ingredient
+
+
 class IngredientCreateView(CreateView):
     success_url = '/ingredient/create'
     model = Ingredient
