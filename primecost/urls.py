@@ -17,7 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-from product.views import (DishDetailView, DishListView, DishCreateView,
+from product.views import (DishDetailView, DishListView, DishCreateView, DishUpdateView,
                            IngredientListView, IngredientDetailView, IngredientCreateView, IngredientUpdateView,
                            ingredient_list_json)
 
@@ -25,9 +25,10 @@ urlpatterns = [
     path('dish/<int:pk>', DishDetailView.as_view(), name='dish_detail'),
     path('dish/list', DishListView.as_view(), name='dish_list'),
     path('dish/create', DishCreateView.as_view(), name='dish_create'),
+    path('dish/<int:pk>/update', DishUpdateView.as_view(), name='dish_update'),
+    path('ingredient/<int:pk>', IngredientDetailView.as_view(), name='ingredient_detail'),
     path('ingredient/list', IngredientListView.as_view(), name='ingredient_list'),
     path('ingredient/list_json', ingredient_list_json),
-    path('ingredient/<int:pk>', IngredientDetailView.as_view(), name='ingredient_detail'),
     path('ingredient/create', IngredientCreateView.as_view(), name='ingredient_create'),
     path('ingredient/<int:pk>/update', IngredientUpdateView.as_view(), name='ingredient_update'),
     path('admin/', admin.site.urls),

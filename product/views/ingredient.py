@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
 
-from models import Ingredient
+from ..models import Ingredient
 
 
 def ingredient_list_json(request):
