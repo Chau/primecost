@@ -69,6 +69,7 @@ class Dish(models.Model):
             DishIngredient.objects.update_or_create(
                 dish=self, ingredient=ingredient, defaults={'amount': ingredient_item['ingredient_amount']}
             )
+    #         TODO: add delete functional
 
     @cached_property
     def total(self) -> float:

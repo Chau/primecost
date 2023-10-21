@@ -18,6 +18,7 @@ class IngredientForm(forms.Form):
 
 IngredientFormset = forms.formset_factory(
             form=IngredientForm,
+            extra=0
         )
 
 
