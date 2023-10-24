@@ -14,7 +14,7 @@
 <hr class="mt-0 mb-4">
 {% include './includes/ingredient_item.html' %}
 
-  <form method="POST" action="{% url 'dish_update' pk=dish.id %}">
+  <form method="POST" action="{% url 'dish_edit' pk=dish.id %}">
     {% csrf_token %}
 
       <div class="mb-3">

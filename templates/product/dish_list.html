@@ -1,5 +1,26 @@
 {% extends 'base.html' %}
-
+{% block title %} Все блюда{% endblock %}
 {% block content %}
-Hello!
+<h2>
+    Все блюда
+
+    <a href="{% url 'dish_create' %}" type="button" class="btn btn-outline-secondary" >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"></path>
+          </svg>
+      </a>
+    <hr class="mt-0 mb-4">
+</h2>
+{% for dish in dishes %}
+    <h4><a href="{% url 'dish_detail' pk=dish.pk %}">{{ dish.name }}</a></h4>
+    <p class="lead">{{ dish.description }}</p>
+    <h5>Ингредиенты</h5>
+    <ul class="list-group">
+      {% for dish_ingredient in dish.dishingredient_set.all %}
+      <li class="list-group-item">{{ dish_ingredient.ingredient.name }}, {{ dish_ingredient.amount }} {{ dish_ingredient.ingredient.unit.full_name }}</li>
+      {% endfor %}
+    </ul>
+    <p>Итого: {{ dish.total }} р.</p>
+    <hr class="mt-0 mb-4">
+{% endfor %}
 {% endblock %}

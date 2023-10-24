@@ -27,9 +27,6 @@ class DishForm(forms.ModelForm):
     def dish_save(self, ingredients_data: t.List[t.Dict]):
         if self.is_valid():
             dish = self.save()
-            # remove empty items
-            while ingredients_data.count({}) > 0:
-                ingredients_data.remove({})
             dish.save_ingredients(ingredients_data)
             return dish
         return

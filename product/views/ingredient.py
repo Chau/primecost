@@ -1,3 +1,4 @@
+from django.urls import reverse
 from django.http import JsonResponse
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
 
@@ -32,4 +33,6 @@ class IngredientUpdateView(UpdateView):
     fields = ('name', 'description', 'unit', 'price')
 
     def get_success_url(self):
-        return '/ingredient/{}/update'.format(self.object.id)
+        return reverse('ingredient_edit', args={'pk': self.object.id})
+
+            # '/ingredient/{}/'.format(self.object.id))

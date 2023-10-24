@@ -12,6 +12,11 @@ class DishDetailView(DetailView):
 class DishListView(ListView):
     model = Dish
 
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['dishes'] = Dish.objects.all().order_by('-pk')
+        return context
+
 
 class DishCreateView(TemplateView):
     template_name = 'product/dish_form_create.html'
@@ -20,11 +25,6 @@ class DishCreateView(TemplateView):
         context = super().get_context_data(**kwargs)
         context['ingredient_formset'] = IngredientFormset()
         return context
-
-    # def get(self, request, *args, **kwargs):
-    #     ingredient_formset = IngredientFormset()
-    #     return render(request, template_name='product/dish_form_create.html',
-    #                   context={'ingredient_formset': ingredient_formset})
 
     def post(self, request, *args, **kwargs):
         dish_form = DishForm(request.POST)
@@ -45,9 +45,7 @@ class DishUpdateView(TemplateView):
         dish = Dish.objects.get(pk=dish_id)
         context['dish'] = dish
         # fill formset: {'ingredient_id': 1, 'ingredient_name': 'name', 'ingredient_amount': 2, 'ingredient_unit': 'шт'}
-        ingredient_data = [
-
-        ]
+        ingredient_data = []
         for dish_ingredient in dish.dishingredient_set.all():
             ingredient_data.append(
                     {
@@ -62,9 +60,6 @@ class DishUpdateView(TemplateView):
         context['ingredient_len'] = len(ingredient_data) - 1
         return context
 
-    # def get(self, request, *args, **kwargs):
-    #     pass
-    #
     def post(self, request, *args, **kwargs):
         dish_form = DishForm(request.POST)
         ingredient_formset = IngredientFormset(request.POST)

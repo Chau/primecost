@@ -25,11 +25,11 @@ urlpatterns = [
     path('dish/<int:pk>', DishDetailView.as_view(), name='dish_detail'),
     path('dish/list', DishListView.as_view(), name='dish_list'),
     path('dish/create', DishCreateView.as_view(), name='dish_create'),
-    path('dish/<int:pk>/edit', DishUpdateView.as_view(), name='dish_update'),
+    path('dish/<int:pk>/edit', DishUpdateView.as_view(), name='dish_edit'),
     path('ingredient/<int:pk>', IngredientDetailView.as_view(), name='ingredient_detail'),
     path('ingredient/list', IngredientListView.as_view(), name='ingredient_list'),
     path('ingredient/list_json', ingredient_list_json),
     path('ingredient/create', IngredientCreateView.as_view(), name='ingredient_create'),
-    path('ingredient/<int:pk>/edit', IngredientUpdateView.as_view(), name='ingredient_update'),
+    path('ingredient/<int:pk>/edit', IngredientUpdateView.as_view(), name='ingredient_edit'),
     path('admin/', admin.site.urls),
 ]

@@ -63,6 +63,7 @@ class Dish(models.Model):
         ]
         :return:
         """
+
         for ingredient_item in ingredients_data:
             # TODO: add exception
             ingredient = Ingredient.objects.get(pk=ingredient_item['ingredient_id'])
