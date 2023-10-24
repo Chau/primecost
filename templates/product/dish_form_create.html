@@ -4,7 +4,7 @@
 
 {% block body %}
 {% load bootstrap %}
-{% include './add_ingredient_modal.html' %}
+{% include './includes/add_ingredient_modal.html' %}
 {% endblock %}
 
 {% block content %}
@@ -12,8 +12,9 @@
        Создать новое блюдо
 </h4>
 <hr class="mt-0 mb-4">
+{% include './includes/ingredient_item.html' %}
 
-  <form method="POST" action="{% url 'dish_create' %}">
+<form method="POST" action="{% url 'dish_create' %}">
     {% csrf_token %}
 
       <div class="mb-3">
@@ -35,19 +36,7 @@
       </div>
       {{ ingredient_formset.management_form }}
       <div class="mb-3" id="ingredientsList">
-        <div class="d-none" id="ingredientItem-0">
-          <div class="input-group mb-3">
-              {% for ingredient_form in ingredient_formset %}
-              {{ ingredient_form|bootstrap_horizontal }}
-              <!--  {{ ingredient_form.ingredient_name|bootstrap }}
-                {{ ingredient_form.ingredient_amount|bootstrap }}
-                {{ ingredient_form.ingredient_unit|bootstrap }} -->
-              {% endfor %}
-           <!-- <input type="text" class="form-control" id="ingredientName-0">
-            <input type="text" class="form-control" id="ingredientAmount-0">
-            <input type="text" class="form-control" id="ingredientUnit-0"> -->
-          </div>
-        </div>
+
       </div>
     <button type="submit" class="btn btn-success">Сохранить</button>
   </form>
@@ -90,11 +79,8 @@
             return;
           }
           ingredientsJson = xhr.response;
-          console.log(ingredientsJson);
-          console.log(ingredientsJson.length);
           for (let i = 0; i < ingredientsJson.length; i++){
             ingredientsDict[ingredientsJson[i]['id']] = ingredientsJson[i];
-            console.log(ingredientsDict);
             let option = document.createElement("option");
             option.text = ingredientsJson[i]['name'];
             option.value = ingredientsJson[i]['id'];
@@ -112,7 +98,7 @@
     ingredientNum = ingredientNum + 1
     // add new ingredient to the ingredient list
     let ingredientsList = document.getElementById('ingredientsList');
-    let ingredientItem = ingredientsList.querySelector('#ingredientItem-0');
+    let ingredientItem = document.getElementById('ingredientItem-0');
     let newIngredientItem = ingredientItem.cloneNode(true);
     newIngredientItem.id = `ingredientItem-${ingredientNum}`;
     newIngredientItem.setAttribute('class', 'visible');

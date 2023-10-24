@@ -19,6 +19,7 @@ class DishCreateView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['ingredient_formset'] = IngredientFormset()
+        return context
 
     # def get(self, request, *args, **kwargs):
     #     ingredient_formset = IngredientFormset()
@@ -45,12 +46,7 @@ class DishUpdateView(TemplateView):
         context['dish'] = dish
         # fill formset: {'ingredient_id': 1, 'ingredient_name': 'name', 'ingredient_amount': 2, 'ingredient_unit': 'шт'}
         ingredient_data = [
-            {
-                'ingredient_id': 0,
-                'ingredient_name': '',
-                'ingredient_amount': '',
-                'ingredient_unit': ''
-            }
+
         ]
         for dish_ingredient in dish.dishingredient_set.all():
             ingredient_data.append(
