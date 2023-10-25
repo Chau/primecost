@@ -19,6 +19,7 @@ from django.urls import path
 
 from product.views import (DishDetailView, DishListView, DishCreateView, DishUpdateView,
                            IngredientListView, IngredientDetailView, IngredientCreateView, IngredientUpdateView,
+                           IngredientDeleteView,
                            ingredient_list_json)
 
 urlpatterns = [
@@ -26,10 +27,12 @@ urlpatterns = [
     path('dish/list', DishListView.as_view(), name='dish_list'),
     path('dish/create', DishCreateView.as_view(), name='dish_create'),
     path('dish/<int:pk>/edit', DishUpdateView.as_view(), name='dish_edit'),
+
     path('ingredient/<int:pk>', IngredientDetailView.as_view(), name='ingredient_detail'),
     path('ingredient/list', IngredientListView.as_view(), name='ingredient_list'),
     path('ingredient/list_json', ingredient_list_json),
     path('ingredient/create', IngredientCreateView.as_view(), name='ingredient_create'),
     path('ingredient/<int:pk>/edit', IngredientUpdateView.as_view(), name='ingredient_edit'),
+    path('ingredient/<int:pk>/delete', IngredientDeleteView.as_view(), name='ingredient_delete'),
     path('admin/', admin.site.urls),
 ]

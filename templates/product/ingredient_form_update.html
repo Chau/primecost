@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block title %}Добавить ингредиент{% endblock %}
+
+{% load bootstrap %}
+
+{% block content %}
+
+  <form method="post">
+    {% csrf_token %}
+    {{ form|bootstrap }}
+    <button type="submit" class="btn btn-success">Сохранить</button>
+    <a href="#" type="button" class="btn btn-secondary">Отмена</a>
+    {% if ingredient %}
+    <button type="button" class="btn btn-secondary">Удалить</button>
+    {% endif %}
+  </form>
+{% endblock %}
