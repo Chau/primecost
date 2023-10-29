@@ -5,6 +5,24 @@
 {% block body %}
 {% load bootstrap %}
 {% include './includes/add_ingredient_modal.html' %}
+
+<div class="modal fade" tabindex="-1" id="deleteModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Удаление</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Вы точно хотите удалить блюдо "{{ dish.name }}"?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="btnDelete">Да</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}
 
 {% block content %}
@@ -47,6 +65,8 @@
          {% endfor %}
       </div>
     <button type="submit" class="btn btn-success">Сохранить</button>
+    <a href="#" type="button" class="btn btn-secondary">Отмена</a>
+    <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#deleteModal">Удалить</button>
   </form>
 
 <script>
@@ -140,6 +160,25 @@
     totalFormInput.value = Number(totalFormInput.value) + 1;
 
   });
+
+  // delete dish
+  document.getElementById('btnDelete').addEventListener('click', function(){
+    const requestURL = "{% url 'dish_delete_json' pk=dish.id %}";
+    const xhr = new XMLHttpRequest();
+      xhr.responseType = 'json';
+      xhr.open('GET', requestURL);
+      xhr.onload = () => {
+          if (xhr.status !== 200) {
+            return;
+          }
+
+         // ingredientsJson = xhr.response;
+        // const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+        // deleteModal.hide();
+         window.location.href = "{% url 'dish_list' %}";
+      }
+      xhr.send();
+});
 
 </script>
 {% endblock %}

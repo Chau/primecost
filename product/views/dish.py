@@ -1,8 +1,13 @@
+from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.views.generic import DetailView, ListView, TemplateView
 
 from ..forms import IngredientFormset, DishForm
 from ..models import Dish
+
+
+def dish_delete_json(request, pk, *args, **kwargs):
+    return JsonResponse({'status': 'ok'}, safe=False)
 
 
 class DishDetailView(DetailView):

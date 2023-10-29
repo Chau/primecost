@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.urls import path
 
 from product.views import (DishDetailView, DishListView, DishCreateView, DishUpdateView,
+                           dish_delete_json,
                            IngredientListView, IngredientDetailView, IngredientCreateView, IngredientUpdateView,
                            IngredientDeleteView,
                            ingredient_list_json, ingredient_delete_json)
@@ -27,7 +28,7 @@ urlpatterns = [
     path('dish/list', DishListView.as_view(), name='dish_list'),
     path('dish/create', DishCreateView.as_view(), name='dish_create'),
     path('dish/<int:pk>/edit', DishUpdateView.as_view(), name='dish_edit'),
-
+    path('dish/<int:pk>/delete_json', dish_delete_json, name='dish_delete_json'),
     path('ingredient/<int:pk>', IngredientDetailView.as_view(), name='ingredient_detail'),
     path('ingredient/list', IngredientListView.as_view(), name='ingredient_list'),
     path('ingredient/list_json', ingredient_list_json, name='ingredient_list_json'),
