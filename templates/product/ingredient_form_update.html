@@ -1,18 +1,65 @@
 {% extends 'base.html' %}
 
-{% block title %}Добавить ингредиент{% endblock %}
+{% block title %}Редактировать "{{ ingredient.name }}"{% endblock %}
+
+{% block body %}
 
 {% load bootstrap %}
+<div class="modal fade" tabindex="-1" id="deleteModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Удаление</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Вы точно хотите удалить ингредиент "{{ ingredient.name }}"?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="btnDelete">Да</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.getElementById('btnDelete').addEventListener('click', function(){
+    const requestURL = "{% url 'ingredient_delete_json' pk=ingredient.id %}";
+    const xhr = new XMLHttpRequest();
+      xhr.responseType = 'json';
+      xhr.open('GET', requestURL);
+      xhr.onload = () => {
+          if (xhr.status !== 200) {
+            return;
+          }
+
+         // ingredientsJson = xhr.response;
+         const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+         deleteModal.hide();
+         window.location.href = "{% url 'ingredient_list' %}";
+      }
+      xhr.send();
+});
+
+</script>
+{% endblock %}
 
 {% block content %}
 
+  <h4 class="mt-2">
+       Редактировать
+  </h4>
+  <hr class="mt-0 mb-4">
   <form method="post">
     {% csrf_token %}
     {{ form|bootstrap }}
     <button type="submit" class="btn btn-success">Сохранить</button>
     <a href="#" type="button" class="btn btn-secondary">Отмена</a>
     {% if ingredient %}
-    <button type="button" class="btn btn-secondary">Удалить</button>
+    <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#deleteModal">Удалить</button>
     {% endif %}
   </form>
+
+
 {% endblock %}

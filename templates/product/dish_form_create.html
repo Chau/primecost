@@ -70,7 +70,7 @@
   ingredientModal.addEventListener('show.bs.modal', function(e) {
       if (modalIsShown == 1) {return};
       // ajax
-      const requestURL = '/ingredient/list_json';
+      const requestURL = "{% url 'ingredient_list_json' %}}";
       const xhr = new XMLHttpRequest();
       xhr.responseType = 'json';
       xhr.open('GET', requestURL);

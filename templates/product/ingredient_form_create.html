@@ -5,7 +5,10 @@
 {% load bootstrap %}
 
 {% block content %}
-
+  <h4 class="mt-2">
+       Добавить ингредиент
+  </h4>
+  <hr class="mt-0 mb-4">
   <form method="post">
     {% csrf_token %}
     {{ form|bootstrap }}

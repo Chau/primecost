@@ -10,6 +10,11 @@ def ingredient_list_json(request):
     return JsonResponse(ingredients_json, safe=False)
 
 
+def ingredient_delete_json(request, pk, *args, **kwargs):
+    Ingredient.objects.filter(pk=pk).delete()
+    return JsonResponse({'status': 'ok'}, safe=False)
+
+
 class IngredientListView(ListView):
     model = Ingredient
     context_object_name = 'ingredients'
@@ -40,3 +45,4 @@ class IngredientUpdateView(UpdateView):
 
 class IngredientDeleteView(DeleteView):
     model = Ingredient
+
