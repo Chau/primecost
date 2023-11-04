@@ -12,6 +12,9 @@ class Ingredient(models.Model):
     description = models.TextField(null=True, blank=True, verbose_name='Описание')
     price = models.DecimalField(max_digits=5, decimal_places=2, verbose_name='Цена в рублях за единицу')
 
+    def search_dishes(self):
+        return [dishingredient.dish for dishingredient in self.dishingredient_set.all()]
+
     @classmethod
     def search_ingredient(cls) -> t.List:
         """

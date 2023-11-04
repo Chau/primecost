@@ -21,12 +21,14 @@
 </div>
 <script>
    var deleteModal = document.getElementById('deleteModal');
+   const modal = new bootstrap.Modal(deleteModal);
     deleteModal.addEventListener('show.bs.modal', function(event){
         var button = event.relatedTarget;
         // var ingredientPk = button.getAttribute("data-bs-pk");
         var deleteButton = deleteModal.querySelector("#btnDelete");
         deleteButton.setAttribute("data-bs-pk", button.getAttribute("data-bs-pk"));
         var ingredientName = button.getAttribute("data-bs-name");
+        deleteButton.setAttribute("data-bs-name", ingredientName);
         var modalQuestion = deleteModal.querySelector(".modal-question");
         modalQuestion.textContent = "Вы действительно хотите удалить ингредиент '" + ingredientName +"'?";
     });
@@ -34,8 +36,9 @@
 var deleteButton = document.getElementById('btnDelete');
 deleteButton.addEventListener('click', function(event){
     var ingredientPk = deleteButton.getAttribute("data-bs-pk");
+    var ingredientName = deleteButton.getAttribute("data-bs-name");
     const requestURL = "/ingredient/" + ingredientPk + "/delete_json";
-    alert(requestURL);
+    modal.hide();
    const xhr = new XMLHttpRequest();
       xhr.responseType = 'json';
       xhr.open('GET', requestURL);
@@ -43,7 +46,17 @@ deleteButton.addEventListener('click', function(event){
           if (xhr.status !== 200) {
             return;
           }
-        
+        ingredientJSON = xhr.response;
+        if (ingredientJSON['status'] == 'ok') {
+            alert("Ингредиент " + ingredientName + " удален.");
+            // remove item from ingredients list
+            var ingredientItemForDelete = document.getElementById("ingredientItem-" + ingredientPk);
+            ingredientItemForDelete.remove();
+            return;
+        } else {
+            alert(ingredientJSON['message']);
+            return;
+        }
       }
       xhr.send();
 });
