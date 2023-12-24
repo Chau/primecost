@@ -1,4 +1,5 @@
 import pytest
+import typing as t
 
 from glossary.models import MeasurementUnit
 from product.models import Ingredient
@@ -29,4 +30,30 @@ def ingredient_w_descr(gramm_unit: MeasurementUnit) -> Ingredient:
         unit=gramm_unit,
         description='Описание ингредиента 2',
         price=0.5
+    )
+
+
+@pytest.fixture
+def ingredient_list(gramm_unit: MeasurementUnit) -> t.List[Ingredient]:
+    return Ingredient.objects.bulk_create(
+        [
+            Ingredient(
+                name='Ингредиент для списка 1',
+                unit=gramm_unit,
+                description='Описание для ингредиента 1',
+                price=1
+            ),
+            Ingredient(
+                name='Ингредиент для списка 2',
+                unit=gramm_unit,
+                description='Описание для ингредиента 2',
+                price=2
+            ),
+            Ingredient(
+                name='Ингредиент для списка 3',
+                unit=gramm_unit,
+                description='Описание для ингредиента 3',
+                price=3
+            ),
+        ]
     )
