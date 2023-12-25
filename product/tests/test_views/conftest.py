@@ -38,18 +38,21 @@ def ingredient_list(gramm_unit: MeasurementUnit) -> t.List[Ingredient]:
     return Ingredient.objects.bulk_create(
         [
             Ingredient(
+                pk=1001,
                 name='Ингредиент для списка 1',
                 unit=gramm_unit,
                 description='Описание для ингредиента 1',
                 price=1
             ),
             Ingredient(
+                pk=1002,
                 name='Ингредиент для списка 2',
                 unit=gramm_unit,
                 description='Описание для ингредиента 2',
                 price=2
             ),
             Ingredient(
+                pk=1003,
                 name='Ингредиент для списка 3',
                 unit=gramm_unit,
                 description='Описание для ингредиента 3',
