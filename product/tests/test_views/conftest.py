@@ -1,8 +1,14 @@
 import pytest
 import typing as t
 
+from django.test import Client
+
 from glossary.models import MeasurementUnit
 from product.models import Ingredient
+
+@pytest.fixture
+def client() -> Client:
+    return Client()
 
 
 @pytest.fixture
