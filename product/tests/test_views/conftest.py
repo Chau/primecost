@@ -4,13 +4,14 @@ import typing as t
 from django.test import Client
 
 from glossary.models import MeasurementUnit
-from product.models import Ingredient
+from product.models import Ingredient, Dish, DishIngredient
 
 @pytest.fixture
 def client() -> Client:
     return Client()
 
 
+#ingredients
 @pytest.fixture
 def gramm_unit():
     return MeasurementUnit.objects.get(
@@ -66,3 +67,17 @@ def ingredient_list(gramm_unit: MeasurementUnit) -> t.List[Ingredient]:
             ),
         ]
     )
+
+# dishes
+@pytest.fixture
+def dish_w_ingredient(ingredient_w_descr: Ingredient) -> Dish:
+    dish = Dish.objects.create(
+        name='Блюдо 1',
+        description='Описание для блюда 1'
+    )
+    DishIngredient.objects.update_or_create(
+        dish=dish,
+        ingredient=ingredient_w_descr,
+        amount=200
+    )
+    return dish

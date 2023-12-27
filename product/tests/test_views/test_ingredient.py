@@ -5,7 +5,7 @@ import decimal
 from django.urls import reverse
 from django.test import Client
 
-from product.models import Ingredient
+from product.models import Ingredient, Dish
 
 pytestmark = pytest.mark.django_db
 
@@ -257,6 +257,7 @@ class IngredientUpdateTest:
         response = client.post(
             reverse('ingredient_edit', kwargs={'pk': ingredient_w_descr.pk})
         )
+        # not success
         assert response.status_code == 200
 
     def test_edit_ingredient(
@@ -271,6 +272,7 @@ class IngredientUpdateTest:
                 'price': 1
             }
         )
+        # redirect if success
         assert response.status_code == 302
         assert Ingredient.objects.count() == 1
         ingredient = Ingredient.objects.get(pk=ingredient_w_descr.pk)
@@ -291,6 +293,7 @@ class IngredientUpdateTest:
                 'price': ingredient_w_descr.price
             }
         )
+        # redirect if success
         assert response.status_code == 302
         assert Ingredient.objects.count() == 1
         ingredient = Ingredient.objects.get(pk=ingredient_w_descr.pk)
@@ -311,6 +314,7 @@ class IngredientUpdateTest:
                 'price': 10
             }
         )
+        # redirect if success
         assert response.status_code == 302
         assert Ingredient.objects.count() == 3
         ingredient = Ingredient.objects.get(pk=1002)
@@ -331,6 +335,7 @@ class IngredientUpdateTest:
                 'price': 10
             }
         )
+        # not success
         assert response.status_code == 200
         assert Ingredient.objects.count() == 1
         ingredient = Ingredient.objects.get(pk=ingredient_w_descr.pk)
@@ -340,5 +345,104 @@ class IngredientUpdateTest:
         assert ingredient.price == 0.5
 
 
-# delete
 # delete_json
+class IngredientDeleteJsonTest:
+
+    def test_empty_db(self, client: Client):
+        response = client.post(
+            reverse('ingredient_delete_json', kwargs={'pk': 1000}),
+            content_type="application/json")
+        assert response.status_code == 200
+        assert response.json() == {
+            'status': 'error',
+            'message': 'Ингредиент не существует в базе'
+        }
+
+    def test_wrong_pk_on_not_empty_db(
+            self, client: Client, ingredient_w_descr: Ingredient
+    ):
+        response = client.post(
+            reverse('ingredient_delete_json', kwargs={'pk': 1000}),
+            content_type="application/json")
+        assert Ingredient.objects.count() == 1
+        assert response.status_code == 200
+        assert response.json() == {
+            'status': 'error',
+            'message': 'Ингредиент не существует в базе'
+        }
+
+    def test_success(self, client: Client, ingredient_w_descr: Ingredient):
+        response = client.post(
+            reverse(
+                'ingredient_delete_json',
+                kwargs={'pk': ingredient_w_descr.pk}
+            ),
+            content_type="application/json"
+        )
+        assert response.status_code == 200
+        assert response.json() == {'status': 'ok'}
+        assert Ingredient.objects.count() == 0
+
+    def test_success_deleting_from_ingredients_list(
+            self, client: Client, ingredient_list: t.List[Ingredient]
+    ):
+        assert Ingredient.objects.count() == 3
+        response = client.post(
+            reverse(
+                'ingredient_delete_json',
+                kwargs={'pk': 1002}
+            ),
+            content_type="application/json"
+        )
+        assert response.status_code == 200
+        assert response.json() == {'status': 'ok'}
+        assert Ingredient.objects.count() == 2
+        with pytest.raises(Ingredient.DoesNotExist):
+            Ingredient.objects.get(pk=1002)
+
+    def test_fail_cause_dish_exists(
+            self,
+            client: Client,
+            ingredient_w_descr: Ingredient,
+            dish_w_ingredient: Dish
+    ):
+        # There is dish exists
+        response = client.post(
+            reverse(
+                'ingredient_delete_json',
+                kwargs={'pk': ingredient_w_descr.pk}
+            ),
+            content_type="application/json"
+        )
+        assert response.status_code == 200
+        assert response.json() == {
+            'status': 'error',
+            'message': 'Невозможно удалить ингредиент "{}", так как он является частью следующих блюд: \n{}'
+                    .format(ingredient_w_descr.name, dish_w_ingredient.name)
+        }
+        assert Ingredient.objects.count() == 1
+
+    def test_success_another_ingredient(
+            self,
+            client: Client,
+            ingredient_wo_descr: Ingredient,
+            dish_w_ingredient: Dish
+    ):
+        # Remove ingredient that is not of dish_w_ingredient
+        assert Ingredient.objects.count() == 2
+        response = client.post(
+            reverse(
+                'ingredient_delete_json',
+                kwargs={'pk': ingredient_wo_descr.pk}
+            ),
+            content_type="application/json"
+        )
+        assert response.status_code == 200
+        assert response.json() == {'status': 'ok'}
+        assert Ingredient.objects.count() == 1
+        with pytest.raises(Ingredient.DoesNotExist):
+            Ingredient.objects.get(pk=ingredient_wo_descr.pk)
+
+
+
+# delete

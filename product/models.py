@@ -40,7 +40,7 @@ class Dish(models.Model):
     name = models.CharField(max_length=128, verbose_name='Наименование блюда')
     description = models.TextField(null=True, blank=True, verbose_name='Описание')
     # TODO: rename to 'ingredients'
-    ingredient = models.ManyToManyField(Ingredient, through='DishIngredient', verbose_name='Ингридиенты')
+    ingredient = models.ManyToManyField(Ingredient, through='DishIngredient', verbose_name='Ингредиенты')
 
     def get_absolute_url(self):
         return '/dish/{}'.format(self.pk)
