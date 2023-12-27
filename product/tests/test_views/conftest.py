@@ -75,9 +75,52 @@ def dish_w_ingredient(ingredient_w_descr: Ingredient) -> Dish:
         name='Блюдо 1',
         description='Описание для блюда 1'
     )
-    DishIngredient.objects.update_or_create(
+    DishIngredient.objects.create(
         dish=dish,
         ingredient=ingredient_w_descr,
         amount=200
     )
     return dish
+
+
+@pytest.fixture
+def dish_list(
+        ingredient_w_descr: Ingredient,
+        ingredient_wo_descr: Ingredient,
+        ingredient_list: t.List[Ingredient]
+) -> t.List[Dish]:
+    dish_list = []
+    dish_list.append(Dish.objects.create(
+        name='Блюдо для списка 1',
+        description='Описание для блюда списка 1'
+    ))
+    DishIngredient.objects.create(
+        dish=dish_list[0],
+        ingredient=ingredient_w_descr,
+        amount=200
+    )
+    dish_list.append(
+        Dish.objects.create(
+            name='Блюдо для списка 2',
+            description='Описание для блюда списка 3'
+        )
+    )
+    DishIngredient.objects.create(
+        dish=dish_list[1],
+        ingredient=ingredient_w_descr,
+        amount=300
+    )
+    dish_list.append(
+        Dish.objects.create(
+            name='Блюдо для списка 3',
+            description='Описание для блюда списка 3'
+        )
+    )
+    for i, ingredient in enumerate(ingredient_list):
+        DishIngredient.objects.create(
+            dish=dish_list[2],
+            ingredient=ingredient_w_descr,
+            amount=150 + i
+        )
+    return dish_list
+

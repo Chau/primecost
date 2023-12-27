@@ -26,7 +26,23 @@ class DishReadDetailTest:
         )
         assert response.status_code == 200
 
+
 # list
+class DishListTest:
+    def test_empty_db(self, client: Client):
+        response = client.get(reverse('dish_list'))
+        assert response.status_code == 200
+
+    def test_list_success(
+            self, client: Client, dish_list: t.List[Dish]
+    ):
+        response = client.get(reverse('dish_list'))
+        assert response.status_code == 200
+
+
+
+
+
 # create
 # update
 # delete
