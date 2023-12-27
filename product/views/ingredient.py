@@ -55,7 +55,7 @@ class IngredientUpdateView(UpdateView):
     fields = ('name', 'description', 'unit', 'price')
 
     def get_success_url(self):
-        return reverse('ingredient_edit', args={'pk': self.object.id})
+        return reverse('ingredient_edit', kwargs={'pk': self.object.id})
 
 
 class IngredientDeleteView(DeleteView):

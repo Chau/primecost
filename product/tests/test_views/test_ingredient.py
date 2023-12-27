@@ -214,5 +214,131 @@ class IngredientCreateTest:
         assert ingredient.unit.pk == 3
         assert ingredient.price == decimal.Decimal('0.10')
 
+    def test_no_data(self, client: Client):
+        response = client.post(reverse('ingredient_create'))
+        assert response.status_code == 200
+        assert Ingredient.objects.count() == 0
+
+    def test_very_long_name(self, client: Client):
+        response = client.post(
+            reverse('ingredient_create'),
+            {
+                'pk': 1,
+                'name': 'veryveryveryveryveryveryveryveryveryveryveryveryveryveryveryverylongname',
+                'description': 'Описание для ингредиента 1',
+                'unit': 3,
+                'price': 1
+            }
+        )
+        assert response.status_code == 200
+        assert Ingredient.objects.count() == 0
+
+
 # update
+class IngredientUpdateTest:
+
+    def test_empty_db(self, client: Client):
+        response = client.post(
+            reverse('ingredient_edit', kwargs={'pk': 1})
+        )
+        assert response.status_code == 404
+
+    def test_wrong_id_on_not_empty_db(
+            self, client: Client, ingredient_w_descr: Ingredient
+    ):
+        response = client.post(
+            reverse('ingredient_edit', kwargs={'pk': 10000})
+        )
+        assert response.status_code == 404
+
+    def test_no_data(
+            self, client: Client, ingredient_w_descr: Ingredient
+    ):
+        response = client.post(
+            reverse('ingredient_edit', kwargs={'pk': ingredient_w_descr.pk})
+        )
+        assert response.status_code == 200
+
+    def test_edit_ingredient(
+            self, client: Client, ingredient_w_descr: Ingredient
+    ):
+        response = client.post(
+            reverse('ingredient_edit', kwargs={'pk': ingredient_w_descr.pk}),
+            {
+                'name': 'Редактированный ингредиент',
+                'description': 'Редактированное описание',
+                'unit': 3,
+                'price': 1
+            }
+        )
+        assert response.status_code == 302
+        assert Ingredient.objects.count() == 1
+        ingredient = Ingredient.objects.get(pk=ingredient_w_descr.pk)
+        assert ingredient.name == 'Редактированный ингредиент'
+        assert ingredient.description == 'Редактированное описание'
+        assert ingredient.unit.pk == 3
+        assert ingredient.price == 1
+
+    def test_edit_unit(
+            self, client: Client, ingredient_w_descr: Ingredient
+    ):
+        response = client.post(
+            reverse('ingredient_edit', kwargs={'pk': ingredient_w_descr.pk}),
+            {
+                'name': ingredient_w_descr.name,
+                'description': ingredient_w_descr.description,
+                'unit': 1,
+                'price': ingredient_w_descr.price
+            }
+        )
+        assert response.status_code == 302
+        assert Ingredient.objects.count() == 1
+        ingredient = Ingredient.objects.get(pk=ingredient_w_descr.pk)
+        assert ingredient.name == 'Ингредиент 2'
+        assert ingredient.description == 'Описание ингредиента 2'
+        assert ingredient.unit.pk == 1
+        assert ingredient.price == 0.5
+
+    def test_one_ingredient_from_list(
+            self, client: Client, ingredient_list: t.List[Ingredient]
+    ):
+        response = client.post(
+            reverse('ingredient_edit', kwargs={'pk': 1002}),
+            {
+                'name': 'Редактированный ингредиент из списка',
+                'description': 'Редактированное описание из списка',
+                'unit': 1,
+                'price': 10
+            }
+        )
+        assert response.status_code == 302
+        assert Ingredient.objects.count() == 3
+        ingredient = Ingredient.objects.get(pk=1002)
+        assert ingredient.name == 'Редактированный ингредиент из списка'
+        assert ingredient.description == 'Редактированное описание из списка'
+        assert ingredient.unit.pk == 1
+        assert ingredient.price == 10
+
+    def test_update_w_very_long_name(
+            self, client: Client, ingredient_w_descr: Ingredient
+    ):
+        response = client.post(
+            reverse('ingredient_edit', kwargs={'pk': ingredient_w_descr.pk}),
+            {
+                'name': 'veryveryveryveryveryveryveryveryveryveryveryveryveryveryveryverylongname',
+                'description': 'Редактированное описание из списка',
+                'unit': 1,
+                'price': 10
+            }
+        )
+        assert response.status_code == 200
+        assert Ingredient.objects.count() == 1
+        ingredient = Ingredient.objects.get(pk=ingredient_w_descr.pk)
+        assert ingredient.name == 'Ингредиент 2'
+        assert ingredient.description == 'Описание ингредиента 2'
+        assert ingredient.unit.pk == 3
+        assert ingredient.price == 0.5
+
+
 # delete
+# delete_json
