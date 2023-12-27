@@ -10,14 +10,8 @@ from product.models import Ingredient, Dish
 pytestmark = pytest.mark.django_db
 
 
-class BaseIngredientView:
-    def __init__(self, client: Client, **kwargs):
-        super(BaseIngredientView).__init__(**kwargs)
-        self.client = client
-
-
 # read detail
-class IngredientReadTest():
+class IngredientReadTest:
 
     def test_empty_model_fail(self, client: Client):
         response = client.get(reverse('ingredient_detail', kwargs={'pk': 1}))
@@ -442,7 +436,6 @@ class IngredientDeleteJsonTest:
         assert Ingredient.objects.count() == 1
         with pytest.raises(Ingredient.DoesNotExist):
             Ingredient.objects.get(pk=ingredient_wo_descr.pk)
-
 
 
 # delete
