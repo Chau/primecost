@@ -11,10 +11,6 @@ class IngredientForm(forms.Form):
     ingredient_amount = forms.FloatField(label='Количество', widget=forms.TextInput(attrs={'id': 'ingredientAmount'}))
     ingredient_unit = forms.CharField(label='Измерение', widget=forms.TextInput(attrs={'id': 'ingredientUnit'}))
 
-    class Meta:
-        # model = Ingredient
-        fields = ('ingredient_id', 'ingredient_name', 'ingredient_amount', 'ingredient_unit')
-
 
 IngredientFormset = forms.formset_factory(
             form=IngredientForm,

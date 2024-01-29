@@ -71,12 +71,124 @@ class DishCreateTest:
         )
         assert response.status_code == 302
         assert Dish.objects.count() == 1
+        assert Ingredient.objects.count() == 3
         dish = Dish.objects.first()
         assert dish.name == 'Торт Байкал'
         assert dish.description == 'Самый вкусный торт из Сибири'
         assert dish.ingredient.count() == 3
 
-# create
+    def test_add_dish_to_not_empty_db(
+            self,
+            client: Client,
+            dish_w_ingredient: Dish,
+            ingredient_list: t.List[Ingredient]
+    ):
+        response = client.post(
+            reverse('dish_create'),
+            {
+                'name': 'Торт Байкал',
+                'description': 'Самый вкусный торт из Сибири',
+                'form-TOTAL_FORMS': 4,
+                'form-INITIAL_FORMS': 0,
+                'form-MIN_NUM_FORMS': 0,
+                'form-MAX_NUM_FORMS': 1000,
+                'form-1-ingredient_id': 1001,
+                'form-1-ingredient_name': 'Яйцо',
+                'form-1-ingredient_amount': 2,
+                'form-1-ingredient_unit': 'шт',
+                'form-2-ingredient_id': 1002,
+                'form-2-ingredient_name': 'Мука',
+                'form-2-ingredient_amount': 0.3,
+                'form-2-ingredient_unit': 'кг',
+                'form-3-ingredient_id': 1003,
+                'form-3-ingredient_name': 'Сахар',
+                'form-3-ingredient_amount': 0.2,
+                'form-3-ingredient_unit': 'кг'
+            }
+        )
+        assert response.status_code == 302
+        assert Dish.objects.count() == 2
+        assert Ingredient.objects.count() == 4
+
+        dish = Dish.objects.exclude(pk=dish_w_ingredient.pk).first()
+        assert dish.name == 'Торт Байкал'
+        assert dish.description == 'Самый вкусный торт из Сибири'
+        assert dish.ingredient.count() == 3
+
+    def test_add_to_dish_list(
+            self,
+            client: Client,
+            dish_list: t.List[Dish],
+            ingredient_list: t.List[Ingredient]
+    ):
+        response = client.post(
+            reverse('dish_create'),
+            {
+                'name': 'Торт Байкал',
+                'description': 'Самый вкусный торт из Сибири',
+                'form-TOTAL_FORMS': 4,
+                'form-INITIAL_FORMS': 0,
+                'form-MIN_NUM_FORMS': 0,
+                'form-MAX_NUM_FORMS': 1000,
+                'form-1-ingredient_id': 1001,
+                'form-1-ingredient_name': 'Яйцо',
+                'form-1-ingredient_amount': 2,
+                'form-1-ingredient_unit': 'шт',
+                'form-2-ingredient_id': 1002,
+                'form-2-ingredient_name': 'Мука',
+                'form-2-ingredient_amount': 0.3,
+                'form-2-ingredient_unit': 'кг',
+                'form-3-ingredient_id': 1003,
+                'form-3-ingredient_name': 'Сахар',
+                'form-3-ingredient_amount': 0.2,
+                'form-3-ingredient_unit': 'кг'
+            }
+        )
+        assert response.status_code == 302
+        assert Dish.objects.count() == 4
+        assert Ingredient.objects.count() == 5
+
+        dish = Dish.objects.exclude(
+            pk__in=[d.pk for d in dish_list]
+        ).first()
+        assert dish.name == 'Торт Байкал'
+        assert dish.description == 'Самый вкусный торт из Сибири'
+        assert dish.ingredient.count() == 3
+
+    # TODO: remove skip mark after error handling
+    @pytest.mark.skip
+    def test_add_dish_w_very_long_name(
+            self,
+            client: Client,
+            ingredient_list: t.List[Ingredient]
+    ):
+        response = client.post(
+            reverse('dish_create'),
+            {
+                'name': 'ОченьОченьОченьОченьОченьОченьОченьОченьОченьОченьОченьОченьОченьОчень' \
+                            'ОченьОченьОченьОченьОченьОченьОченьОченьОчень длинное название',
+                'description': 'Самый вкусный торт из Сибири',
+                'form-TOTAL_FORMS': 4,
+                'form-INITIAL_FORMS': 0,
+                'form-MIN_NUM_FORMS': 0,
+                'form-MAX_NUM_FORMS': 1000,
+                'form-1-ingredient_id': 1001,
+                'form-1-ingredient_name': 'Яйцо',
+                'form-1-ingredient_amount': 2,
+                'form-1-ingredient_unit': 'шт',
+                'form-2-ingredient_id': 1002,
+                'form-2-ingredient_name': 'Мука',
+                'form-2-ingredient_amount': 0.3,
+                'form-2-ingredient_unit': 'кг',
+                'form-3-ingredient_id': 1003,
+                'form-3-ingredient_name': 'Сахар',
+                'form-3-ingredient_amount': 0.2,
+                'form-3-ingredient_unit': 'кг'
+            }
+        )
+        assert response.status_code == 302
+        assert Dish.objects.count() == 0
+
 # update
 # delete
 
