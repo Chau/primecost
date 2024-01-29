@@ -6,7 +6,13 @@ from ..forms import IngredientFormset, DishForm
 from ..models import Dish
 
 
-def dish_delete_json(request, pk, *args, **kwargs):
+def dish_delete_json(request, pk: int, *args, **kwargs):
+    try:
+        Dish.objects.get(pk=pk)
+    except Dish.DoesNotExist:
+        result = {'status': 'error', 'message': 'Нет такого блюда.'}
+        return JsonResponse(result, safe=False)
+    Dish.delete_dish(dish_id=pk)
     return JsonResponse({'status': 'ok'}, safe=False)
 
 

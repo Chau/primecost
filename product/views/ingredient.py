@@ -13,20 +13,22 @@ def ingredient_list_json(request):
 def ingredient_delete_json(request, pk, *args, **kwargs):
     try:
         ingredient = Ingredient.objects.get(pk=pk)
-        dishes = ingredient.search_dishes()
-        if not dishes:
-            Ingredient.objects.filter(pk=pk).delete()
-            result = {'status': 'ok'}
-        else:
-            dishes_message = (
-                'Невозможно удалить ингредиент "{}", так как он является частью следующих блюд: \n{}'
-                              .format(
-                                    ingredient.name,
-                                          '\n'.join([dish.name for dish in dishes]))
-            )
-            result = {'status': 'error', 'message': dishes_message}
     except Ingredient.DoesNotExist:
         result = {'status': 'error', 'message': 'Ингредиент не существует в базе'}
+        return JsonResponse(result, safe=False)
+
+    dishes = ingredient.search_dishes()
+    if not dishes:
+        Ingredient.objects.filter(pk=pk).delete()
+        result = {'status': 'ok'}
+    else:
+        dishes_message = (
+            'Невозможно удалить ингредиент "{}", так как он является частью следующих блюд: \n{}'
+                          .format(
+                                ingredient.name,
+                                      '\n'.join([dish.name for dish in dishes]))
+        )
+        result = {'status': 'error', 'message': dishes_message}
     return JsonResponse(result, safe=False)
 
 

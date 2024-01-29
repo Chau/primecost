@@ -42,6 +42,14 @@ class Dish(models.Model):
     # TODO: rename to 'ingredients'
     ingredient = models.ManyToManyField(Ingredient, through='DishIngredient', verbose_name='Ингредиенты')
 
+    @classmethod
+    def delete_dish(cls, dish_id: int):
+        # remove ingredients relation
+        DishIngredient.objects.filter(dish__pk=dish_id).delete()
+        # remove dish
+        Dish.objects.filter(pk=dish_id).delete()
+        return
+
     def get_absolute_url(self):
         return '/dish/{}'.format(self.pk)
 

@@ -4,7 +4,7 @@ import typing as t
 from django.urls import reverse
 from django.test import Client
 
-from product.models import Ingredient, Dish
+from product.models import Ingredient, Dish, DishIngredient
 
 pytestmark = pytest.mark.django_db
 
@@ -189,6 +189,68 @@ class DishCreateTest:
         assert response.status_code == 302
         assert Dish.objects.count() == 0
 
+
 # update
+class DishUpdateTest:
+
+    pass
+
 # delete
+class DishDeleteJsonTest:
+
+
+    def test_delete_from_empty_db(self, client: Client):
+        response = client.post(
+            reverse('dish_delete_json', kwargs={'pk': 1000}),
+            content_type="application/json")
+        assert response.status_code == 200
+        assert response.json() == {
+            'status': 'error', 'message': 'Нет такого блюда.'
+        }
+
+    def test_delete_only_dish(
+            self,
+            client: Client,
+            dish_w_ingredient: Dish
+    ):
+        response = client.post(
+            reverse('dish_delete_json', kwargs={'pk': dish_w_ingredient.pk}),
+            content_type="application/json")
+        assert response.status_code == 200
+        assert response.json() == {'status': 'ok'}
+        assert Dish.objects.count() == 0
+        assert Ingredient.objects.count() == 1
+        assert DishIngredient.objects.count() == 0
+
+    def test_delete_from_list(
+            self,
+            client: Client,
+            dish_list: t.List[Dish]
+    ):
+        dish_id = dish_list[0].pk
+        assert DishIngredient.objects.filter(dish__id=dish_id).count() == 1
+        response = client.post(
+            reverse('dish_delete_json', kwargs={'pk': dish_id}),
+            content_type="application/json")
+        assert response.status_code == 200
+        assert response.json() == {'status': 'ok'}
+        assert Dish.objects.count() == 2
+        assert Ingredient.objects.count() == 5
+        assert DishIngredient.objects.filter(dish__id=dish_id).count() == 0
+
+    def test_wrong_pk_on_not_empty_db(
+            self,
+            client: Client,
+            dish_list: t.List[Dish]
+    ):
+        response = client.post(
+            reverse('dish_delete_json', kwargs={'pk': 10000}),
+            content_type="application/json")
+        assert response.status_code == 200
+        assert response.json() == {
+            'status': 'error', 'message': 'Нет такого блюда.'
+        }
+        assert Dish.objects.count() == 3
+        assert Ingredient.objects.count() == 5
+        assert DishIngredient.objects.count() == 5
 
