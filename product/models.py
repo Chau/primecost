@@ -69,6 +69,8 @@ class Dish(models.Model):
 
         for ingredient_item in ingredients_data:
             # TODO: add exception
+            if not ingredient_item:
+                continue
             ingredient = Ingredient.objects.get(pk=ingredient_item['ingredient_id'])
             DishIngredient.objects.update_or_create(
                 dish=self, ingredient=ingredient, defaults={'amount': ingredient_item['ingredient_amount']}
