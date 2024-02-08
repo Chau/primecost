@@ -70,6 +70,14 @@ def ingredient_list(gramm_unit: MeasurementUnit) -> t.List[Ingredient]:
 
 # dishes
 @pytest.fixture
+def dish_wo_ingredients() -> Dish:
+    return Dish.objects.create(
+        name='Блюдо без ингридиентов',
+        description='Описание для блюда без ингридиентов'
+    )
+
+
+@pytest.fixture
 def dish_w_ingredient(ingredient_w_descr: Ingredient) -> Dish:
     dish = Dish.objects.create(
         name='Блюдо 1',
@@ -79,6 +87,27 @@ def dish_w_ingredient(ingredient_w_descr: Ingredient) -> Dish:
         dish=dish,
         ingredient=ingredient_w_descr,
         amount=200
+    )
+    return dish
+
+@pytest.fixture
+def dish_w_ingredient_list(
+        ingredient_w_descr: Ingredient,
+        ingredient_wo_descr: Ingredient
+) -> Dish:
+    dish = Dish.objects.create(
+        name='Блюдо 1',
+        description='Описание для блюда 1'
+    )
+    DishIngredient.objects.create(
+        dish=dish,
+        ingredient=ingredient_w_descr,
+        amount=200
+    )
+    DishIngredient.objects.create(
+        dish=dish,
+        ingredient=ingredient_wo_descr,
+        amount=50
     )
     return dish
 

@@ -1,5 +1,5 @@
 from django.http import JsonResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import DetailView, ListView, TemplateView
 
 from ..forms import IngredientFormset, DishForm
@@ -30,6 +30,7 @@ class DishListView(ListView):
 
 
 class DishCreateView(TemplateView):
+    # TODO: Попробовать переделать на наследование от FormView
     template_name = 'product/dish_form_create.html'
 
     def get_context_data(self, **kwargs):
@@ -40,14 +41,20 @@ class DishCreateView(TemplateView):
     def post(self, request, *args, **kwargs):
         dish_form = DishForm(request.POST)
         ingredient_formset = IngredientFormset(request.POST)
+        if dish_form.is_valid():
+            dish = dish_form.save()
+        # TODO: handle exceptions: show errors if not valid
         if ingredient_formset.is_valid():
-            dish = dish_form.dish_save(ingredient_formset.cleaned_data)
+            dish.save_ingredients(ingredient_formset.cleaned_data)
+        # if ingredient_formset.is_valid():
+        #     dish = dish_form.dish_save(ingredient_formset.cleaned_data)
         # TODO: change to dish with argument dish_id
         # TODO: show errors if not valid
         return redirect(dish)
 
 
 class DishUpdateView(TemplateView):
+    # TODO: Попробовать переделать на наследование от FormView
     template_name = 'product/dish_form_update.html'
 
     def get_context_data(self, **kwargs):
@@ -63,7 +70,7 @@ class DishUpdateView(TemplateView):
                         'ingredient_id': dish_ingredient.ingredient.id,
                         'ingredient_name': dish_ingredient.ingredient.name,
                         'ingredient_amount': dish_ingredient.amount,
-                        'ingredient_unit': dish_ingredient.ingredient.unit.full_name
+                        'ingredient_unit': dish_ingredient.ingredient.unit.designation
                     }
 
             )
@@ -71,11 +78,19 @@ class DishUpdateView(TemplateView):
         context['ingredient_len'] = len(ingredient_data) - 1
         return context
 
-    def post(self, request, *args, **kwargs):
-        dish_form = DishForm(request.POST)
+    def post(self, request, pk: int, *args, **kwargs):
+        dish = get_object_or_404(Dish, pk=pk)
+        dish_form = DishForm(request.POST, instance=dish)
+        if dish_form.is_valid():
+            dish_form.save()
+        # TODO: handle exceptions: show errors if not valid
+
         ingredient_formset = IngredientFormset(request.POST)
         if ingredient_formset.is_valid():
-            dish = dish_form.dish_save(ingredient_formset.cleaned_data)
+            dish.save_ingredients(ingredient_formset.cleaned_data)
+
+        # if ingredient_formset.is_valid():
+        #     dish = dish_form.dish_save(ingredient_formset.cleaned_data)
         # TODO: change to dish with argument dish_id
         # TODO: show errors if not valid
         return redirect(dish)

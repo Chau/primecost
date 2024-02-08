@@ -74,16 +74,24 @@ class Dish(models.Model):
         ]
         :return:
         """
+        dish_ingredients = self.dishingredient_set.all()
+        if ingredients_data == []:
+            dish_ingredients.delete()
+            return
 
+        updated_pk = []
         for ingredient_item in ingredients_data:
             # TODO: add exception
             if not ingredient_item:
                 continue
             ingredient = Ingredient.objects.get(pk=ingredient_item['ingredient_id'])
-            DishIngredient.objects.update_or_create(
+            dish_ingredients.update_or_create(
                 dish=self, ingredient=ingredient, defaults={'amount': ingredient_item['ingredient_amount']}
             )
-    #         TODO: add delete functional
+            updated_pk.append(ingredient.pk)
+        # delete relations not in ingredients_data
+        dish_ingredients.exclude(ingredient__pk__in=updated_pk).delete()
+
 
     @cached_property
     def total(self) -> float:

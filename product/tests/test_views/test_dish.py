@@ -77,6 +77,21 @@ class DishCreateTest:
         assert dish.description == 'Самый вкусный торт из Сибири'
         assert dish.ingredient.count() == 3
 
+    def test_add_dish_wo_ingredients(self, client: Client):
+        response = client.post(
+            reverse('dish_create'),
+            {
+                'name': 'Торт Байкал',
+                'description': 'Самый вкусный торт из Сибири',
+            }
+        )
+        assert response.status_code == 302
+        assert Dish.objects.count() == 1
+        dish = Dish.objects.first()
+        assert dish.name == 'Торт Байкал'
+        assert dish.description == 'Самый вкусный торт из Сибири'
+        assert dish.ingredient.count() == 0
+
     def test_add_dish_to_not_empty_db(
             self,
             client: Client,
@@ -109,7 +124,6 @@ class DishCreateTest:
         assert response.status_code == 302
         assert Dish.objects.count() == 2
         assert Ingredient.objects.count() == 4
-
         dish = Dish.objects.exclude(pk=dish_w_ingredient.pk).first()
         assert dish.name == 'Торт Байкал'
         assert dish.description == 'Самый вкусный торт из Сибири'
@@ -193,11 +207,361 @@ class DishCreateTest:
 # update
 class DishUpdateTest:
 
-    pass
+    def test_update_empty_db(self, client: Client):
+        response = client.post(
+            reverse('dish_edit', kwargs={'pk': 10000}),
+            data={
+                'csrfmiddlewaretoken': 'ZPNxsqWNh1Zt73WZJXICSHX7OOFGN5chiZDvzzRNLUaH2HLf1O61Wc5FrvniopI3',
+                'name': 'Блюдо дна',
+                'description': 'Описание блюда дна',
+                'form-TOTAL_FORMS': 2,
+                'form-INITIAL_FORMS': 0,
+                'form-MIN_NUM_FORMS': 0,
+                'form-MAX_NUM_FORMS': 1000,
+                'form-0-ingredient_id': 2,
+                'form-0-ingredient_name': 'Яйцо',
+                'form-0-ingredient_amount': 3,
+                'form-0-ingredient_unit': 'шт',
+                'form-1-ingredient_id': 6,
+                'form-1-ingredient_name': 'Сахар',
+                'form-1-ingredient_amount': 0.2,
+                'form-1-ingredient_unit': 'кг'
+            }
+        )
+        assert response.status_code == 404
+
+    def test_404_on_not_empty_db(
+            self,
+            client: Client,
+            dish_w_ingredient: Dish
+    ):
+        response = client.post(
+            reverse('dish_edit', kwargs={'pk': 10000}),
+            data={
+                'csrfmiddlewaretoken': 'ZPNxsqWNh1Zt73WZJXICSHX7OOFGN5chiZDvzzRNLUaH2HLf1O61Wc5FrvniopI3',
+                'name': 'Блюдо дна',
+                'description': 'Описание блюда дна',
+                'form-TOTAL_FORMS': 2,
+                'form-INITIAL_FORMS': 0,
+                'form-MIN_NUM_FORMS': 0,
+                'form-MAX_NUM_FORMS': 1000,
+                'form-0-ingredient_id': 2,
+                'form-0-ingredient_name': 'Яйцо',
+                'form-0-ingredient_amount': 3,
+                'form-0-ingredient_unit': 'шт',
+                'form-1-ingredient_id': 6,
+                'form-1-ingredient_name': 'Сахар',
+                'form-1-ingredient_amount': 0.2,
+                'form-1-ingredient_unit': 'кг'
+            }
+        )
+        assert response.status_code == 404
+
+    # update data
+    def test_update_dish_wo_ingredient(
+            self,
+            client: Client,
+            dish_wo_ingredients: Dish
+    ):
+        response = client.post(
+            reverse('dish_edit', kwargs={'pk': dish_wo_ingredients.pk}),
+            data={
+                'csrfmiddlewaretoken': 'ZPNxsqWNh1Zt73WZJXICSHX7OOFGN5chiZDvzzRNLUaH2HLf1O61Wc5FrvniopI3',
+                'id': dish_wo_ingredients.pk,
+                'name': 'Блюдо дна',
+                'description': 'Описание блюда дна',
+            }
+        )
+        assert response.status_code == 302
+        assert Dish.objects.count() == 1
+        dish = Dish.objects.get(pk=dish_wo_ingredients.pk)
+        assert dish.name == 'Блюдо дна'
+        assert dish.description == 'Описание блюда дна'
+        assert Ingredient.objects.count() == 0
+        
+    def test_update_only_dish_data(
+            self,
+            client: Client,
+            dish_w_ingredient: Dish,
+            ingredient_w_descr: Ingredient
+    ):
+        response = client.post(
+            reverse('dish_edit', kwargs={'pk': dish_w_ingredient.pk}),
+            data={
+                'csrfmiddlewaretoken': 'ZPNxsqWNh1Zt73WZJXICSHX7OOFGN5chiZDvzzRNLUaH2HLf1O61Wc5FrvniopI3',
+                'name': 'Блюдо дна',
+                'description': 'Описание блюда дна',
+                'form-TOTAL_FORMS': 1,
+                'form-INITIAL_FORMS': 0,
+                'form-MIN_NUM_FORMS': 0,
+                'form-MAX_NUM_FORMS': 1000,
+                'form-0-ingredient_id': ingredient_w_descr.pk,
+                'form-0-ingredient_name': ingredient_w_descr.name,
+                'form-0-ingredient_amount': 200,
+                'form-0-ingredient_unit': ingredient_w_descr.unit.designation
+            }
+        )
+        assert response.status_code == 302
+        assert Dish.objects.count() == 1
+        dish = Dish.objects.get(pk=dish_w_ingredient.pk)
+        assert dish.name == 'Блюдо дна'
+        assert dish.description == 'Описание блюда дна'
+        assert Ingredient.objects.count() == 1
+        assert dish.dishingredient_set.count() == 1
+
+    def test_update_only_ingredient_data(
+            self,
+            client: Client,
+            dish_w_ingredient: Dish,
+            ingredient_w_descr: Ingredient
+    ):
+        assert Dish.objects.count() == 1
+        assert Ingredient.objects.count() == 1
+        response = client.post(
+            reverse('dish_edit', kwargs={'pk': dish_w_ingredient.pk}),
+            data={
+                'csrfmiddlewaretoken': 'ZPNxsqWNh1Zt73WZJXICSHX7OOFGN5chiZDvzzRNLUaH2HLf1O61Wc5FrvniopI3',
+                'name': dish_w_ingredient.name,
+                'description': dish_w_ingredient.description,
+                'form-TOTAL_FORMS': 1,
+                'form-INITIAL_FORMS': 0,
+                'form-MIN_NUM_FORMS': 0,
+                'form-MAX_NUM_FORMS': 1000,
+                'form-0-ingredient_id': ingredient_w_descr.pk,
+                'form-0-ingredient_name': ingredient_w_descr.name,
+                'form-0-ingredient_amount': 100,
+                'form-0-ingredient_unit': ingredient_w_descr.unit.designation
+            }
+        )
+        assert response.status_code == 302
+        assert Dish.objects.count() == 1
+        dish = Dish.objects.get(pk=dish_w_ingredient.pk)
+        assert dish.name == dish_w_ingredient.name
+        assert dish.description == dish_w_ingredient.description
+        assert Ingredient.objects.count() == 1
+        ingredient = Ingredient.objects.first()
+        assert dish.dishingredient_set.count() == 1
+        dish_ingredient = dish.dishingredient_set.first()
+        assert dish_ingredient.amount == 100
+        assert dish_ingredient.ingredient.pk == ingredient.pk
+
+    def test_update_dish_and_ingredient_data(
+            self,
+            client: Client,
+            dish_w_ingredient: Dish,
+            ingredient_w_descr: Ingredient
+    ):
+        assert Dish.objects.count() == 1
+        assert Ingredient.objects.count() == 1
+        response = client.post(
+            reverse('dish_edit', kwargs={'pk': dish_w_ingredient.pk}),
+            data={
+                'csrfmiddlewaretoken': 'ZPNxsqWNh1Zt73WZJXICSHX7OOFGN5chiZDvzzRNLUaH2HLf1O61Wc5FrvniopI3',
+                'name': 'Блюдо дна',
+                'description': 'Описание блюда дна',
+                'form-TOTAL_FORMS': 1,
+                'form-INITIAL_FORMS': 0,
+                'form-MIN_NUM_FORMS': 0,
+                'form-MAX_NUM_FORMS': 1000,
+                'form-0-ingredient_id': ingredient_w_descr.pk,
+                'form-0-ingredient_name': ingredient_w_descr.name,
+                'form-0-ingredient_amount': 100,
+                'form-0-ingredient_unit': ingredient_w_descr.unit.designation
+            }
+        )
+        assert response.status_code == 302
+        assert Dish.objects.count() == 1
+        dish = Dish.objects.get(pk=dish_w_ingredient.pk)
+        assert dish.name == 'Блюдо дна'
+        assert dish.description == 'Описание блюда дна'
+        assert Ingredient.objects.count() == 1
+        ingredient = Ingredient.objects.first()
+        assert dish.dishingredient_set.count() == 1
+        dish_ingredient = dish.dishingredient_set.first()
+        assert dish_ingredient.amount == 100
+        assert dish_ingredient.ingredient.pk == ingredient.pk
+
+    # add ingredients
+    def test_add_ingredient_to_dish_wo_ingredient(
+            self,
+            client: Client,
+            dish_wo_ingredients: Dish,
+            ingredient_w_descr: Ingredient
+    ):
+        assert Dish.objects.count() == 1
+        assert Ingredient.objects.count() == 1
+        response = client.post(
+            reverse('dish_edit', kwargs={'pk': dish_wo_ingredients.pk}),
+            data={
+                'csrfmiddlewaretoken': 'ZPNxsqWNh1Zt73WZJXICSHX7OOFGN5chiZDvzzRNLUaH2HLf1O61Wc5FrvniopI3',
+                'name': dish_wo_ingredients.name,
+                'description': dish_wo_ingredients.description,
+                'form-TOTAL_FORMS': 1,
+                'form-INITIAL_FORMS': 0,
+                'form-MIN_NUM_FORMS': 0,
+                'form-MAX_NUM_FORMS': 1000,
+                'form-0-ingredient_id': ingredient_w_descr.pk,
+                'form-0-ingredient_name': ingredient_w_descr.name,
+                'form-0-ingredient_amount': 100,
+                'form-0-ingredient_unit': ingredient_w_descr.unit.designation
+            }
+        )
+        assert response.status_code == 302
+        assert Dish.objects.count() == 1
+        dish = Dish.objects.get(pk=dish_wo_ingredients.pk)
+        assert dish.name == dish_wo_ingredients.name
+        assert dish.description == dish_wo_ingredients.description
+        assert Ingredient.objects.count() == 1
+        ingredient = Ingredient.objects.first()
+        assert dish.dishingredient_set.count() == 1
+        dish_ingredient = dish.dishingredient_set.first()
+        assert dish_ingredient.amount == 100
+        assert dish_ingredient.ingredient.pk == ingredient.pk
+
+    def test_add_ingredient_and_update_dish__wo_ingredient_data_(
+            self,
+            client: Client,
+            dish_wo_ingredients: Dish,
+            ingredient_w_descr: Ingredient
+    ):
+        assert Dish.objects.count() == 1
+        assert Ingredient.objects.count() == 1
+        response = client.post(
+            reverse('dish_edit', kwargs={'pk': dish_wo_ingredients.pk}),
+            data={
+                'csrfmiddlewaretoken': 'ZPNxsqWNh1Zt73WZJXICSHX7OOFGN5chiZDvzzRNLUaH2HLf1O61Wc5FrvniopI3',
+                'name': 'Блюдо дна',
+                'description': 'Описание блюда дна',
+                'form-TOTAL_FORMS': 1,
+                'form-INITIAL_FORMS': 0,
+                'form-MIN_NUM_FORMS': 0,
+                'form-MAX_NUM_FORMS': 1000,
+                'form-0-ingredient_id': ingredient_w_descr.pk,
+                'form-0-ingredient_name': ingredient_w_descr.name,
+                'form-0-ingredient_amount': 100,
+                'form-0-ingredient_unit': ingredient_w_descr.unit.designation
+            }
+        )
+        assert response.status_code == 302
+        assert Dish.objects.count() == 1
+        dish = Dish.objects.get(pk=dish_wo_ingredients.pk)
+        assert dish.name == 'Блюдо дна'
+        assert dish.description == 'Описание блюда дна'
+        assert Ingredient.objects.count() == 1
+        ingredient = Ingredient.objects.first()
+        assert dish.dishingredient_set.count() == 1
+        dish_ingredient = dish.dishingredient_set.first()
+        assert dish_ingredient.amount == 100
+        assert dish_ingredient.ingredient.pk == ingredient.pk
+
+    def test_add_ingredient_to_dish_w_ingredients(
+            self,
+            client: Client,
+            dish_w_ingredient: Dish,
+            ingredient_w_descr: Ingredient,
+            ingredient_wo_descr: Ingredient
+    ):
+        assert Dish.objects.count() == 1
+        assert Ingredient.objects.count() == 2
+        response = client.post(
+            reverse('dish_edit', kwargs={'pk': dish_w_ingredient.pk}),
+            data={
+                'csrfmiddlewaretoken': 'ZPNxsqWNh1Zt73WZJXICSHX7OOFGN5chiZDvzzRNLUaH2HLf1O61Wc5FrvniopI3',
+                'name': 'Блюдо дна',
+                'description': 'Описание блюда дна',
+                'form-TOTAL_FORMS': 2,
+                'form-INITIAL_FORMS': 0,
+                'form-MIN_NUM_FORMS': 0,
+                'form-MAX_NUM_FORMS': 1000,
+                'form-0-ingredient_id': ingredient_w_descr.pk,
+                'form-0-ingredient_name': ingredient_w_descr.name,
+                'form-0-ingredient_amount': 100,
+                'form-0-ingredient_unit': ingredient_w_descr.unit.designation,
+                'form-1-ingredient_id': ingredient_wo_descr.pk,
+                'form-1-ingredient_name': ingredient_wo_descr.name,
+                'form-1-ingredient_amount': 98,
+                'form-1-ingredient_unit': ingredient_wo_descr.unit.designation,
+            }
+        )
+        assert response.status_code == 302
+        assert Dish.objects.count() == 1
+        dish = Dish.objects.get(pk=dish_w_ingredient.pk)
+        assert dish.name == 'Блюдо дна'
+        assert dish.description == 'Описание блюда дна'
+        assert Ingredient.objects.count() == 2
+        assert dish.dishingredient_set.count() == 2
+        dish_ingredient_1 = dish.dishingredient_set.get(ingredient=ingredient_w_descr)
+        assert dish_ingredient_1.amount == 100
+        dish_ingredient_2 = dish.dishingredient_set.get(ingredient=ingredient_wo_descr)
+        assert dish_ingredient_2.amount == 98
+
+    # remove ingredients
+    def test_remove_only_ingredient(
+            self,
+            client: Client,
+            dish_w_ingredient: Dish,
+            ingredient_w_descr: Ingredient
+    ):
+        assert Dish.objects.count() == 1
+        assert Ingredient.objects.count() == 1
+        response = client.post(
+            reverse('dish_edit', kwargs={'pk': dish_w_ingredient.pk}),
+            data={
+                'csrfmiddlewaretoken': 'ZPNxsqWNh1Zt73WZJXICSHX7OOFGN5chiZDvzzRNLUaH2HLf1O61Wc5FrvniopI3',
+                'name': dish_w_ingredient.name,
+                'description': dish_w_ingredient.description,
+            }
+        )
+        assert response.status_code == 302
+        assert Dish.objects.count() == 1
+        dish = Dish.objects.get(pk=dish_w_ingredient.pk)
+        assert dish.name == dish_w_ingredient.name
+        assert dish.description == dish_w_ingredient.description
+        assert Ingredient.objects.count() == 1
+        assert dish.dishingredient_set.count() == 0
+
+    def test_remove_from_ingredient_list(
+            self,
+            client: Client,
+            dish_w_ingredient_list: Dish,
+            ingredient_w_descr: Ingredient,
+            ingredient_wo_descr: Ingredient
+    ):
+        assert Dish.objects.count() == 1
+        assert Ingredient.objects.count() == 2
+        response = client.post(
+            reverse('dish_edit', kwargs={'pk': dish_w_ingredient_list.pk}),
+            data={
+                'csrfmiddlewaretoken': 'ZPNxsqWNh1Zt73WZJXICSHX7OOFGN5chiZDvzzRNLUaH2HLf1O61Wc5FrvniopI3',
+                'name': dish_w_ingredient_list.name,
+                'description': dish_w_ingredient_list.description,
+                'form-TOTAL_FORMS': 1,
+                'form-INITIAL_FORMS': 0,
+                'form-MIN_NUM_FORMS': 0,
+                'form-MAX_NUM_FORMS': 1000,
+                'form-0-ingredient_id': ingredient_w_descr.pk,
+                'form-0-ingredient_name': ingredient_w_descr.name,
+                'form-0-ingredient_amount': 200,
+                'form-0-ingredient_unit': ingredient_w_descr.unit.designation
+            }
+        )
+        assert response.status_code == 302
+        assert Dish.objects.count() == 1
+        dish = Dish.objects.get(pk=dish_w_ingredient_list.pk)
+        assert dish.name == dish_w_ingredient_list.name
+        assert dish.description == dish_w_ingredient_list.description
+        assert Ingredient.objects.count() == 2
+        assert dish.dishingredient_set.count() == 1
+        dish_ingredient = dish.dishingredient_set.first()
+        assert dish_ingredient.ingredient == ingredient_w_descr
+        assert dish_ingredient.amount == 200
+
+    # remove and edit ingredients
+    # ingredients reordering
+
 
 # delete
 class DishDeleteJsonTest:
-
 
     def test_delete_from_empty_db(self, client: Client):
         response = client.post(
