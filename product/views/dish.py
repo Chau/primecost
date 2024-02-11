@@ -84,7 +84,6 @@ class DishUpdateView(TemplateView):
         if dish_form.is_valid():
             dish_form.save()
         # TODO: handle exceptions: show errors if not valid
-
         ingredient_formset = IngredientFormset(request.POST)
         if ingredient_formset.is_valid():
             dish.save_ingredients(ingredient_formset.cleaned_data)

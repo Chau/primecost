@@ -510,6 +510,10 @@ class DishUpdateTest:
                 'csrfmiddlewaretoken': 'ZPNxsqWNh1Zt73WZJXICSHX7OOFGN5chiZDvzzRNLUaH2HLf1O61Wc5FrvniopI3',
                 'name': dish_w_ingredient.name,
                 'description': dish_w_ingredient.description,
+                'form-TOTAL_FORMS': 0,
+                'form-INITIAL_FORMS': 0,
+                'form-MIN_NUM_FORMS': 0,
+                'form-MAX_NUM_FORMS': 1000,
             }
         )
         assert response.status_code == 302
@@ -556,8 +560,181 @@ class DishUpdateTest:
         assert dish_ingredient.ingredient == ingredient_w_descr
         assert dish_ingredient.amount == 200
 
+    # remove and add ingredients
+    def test_remove_only_add_new_ingredient(
+            self,
+            client: Client,
+            dish_w_ingredient: Dish,
+            ingredient_w_descr: Ingredient,
+            ingredient_wo_descr: Ingredient
+    ):
+        assert Dish.objects.count() == 1
+        assert Ingredient.objects.count() == 2
+        response = client.post(
+            reverse('dish_edit', kwargs={'pk': dish_w_ingredient.pk}),
+            data={
+                'csrfmiddlewaretoken': 'ZPNxsqWNh1Zt73WZJXICSHX7OOFGN5chiZDvzzRNLUaH2HLf1O61Wc5FrvniopI3',
+                'name': dish_w_ingredient.name,
+                'description': dish_w_ingredient.description,
+                'form-TOTAL_FORMS': 1,
+                'form-INITIAL_FORMS': 0,
+                'form-MIN_NUM_FORMS': 0,
+                'form-MAX_NUM_FORMS': 1000,
+                'form-0-ingredient_id': ingredient_wo_descr.pk,
+                'form-0-ingredient_name': ingredient_wo_descr.name,
+                'form-0-ingredient_amount': 150,
+                'form-0-ingredient_unit': ingredient_wo_descr.unit.designation
+            }
+        )
+        assert response.status_code == 302
+        assert Dish.objects.count() == 1
+        dish = Dish.objects.get(pk=dish_w_ingredient.pk)
+        assert dish.name == dish_w_ingredient.name
+        assert dish.description == dish_w_ingredient.description
+        assert Ingredient.objects.count() == 2
+        assert dish.dishingredient_set.count() == 1
+        dishingredient = dish.dishingredient_set.first()
+        assert dishingredient.ingredient == ingredient_wo_descr
+        assert dishingredient.amount == 150
+
+    def test_remove_from_list_add_ingredient(
+            self,
+            client: Client,
+            dish_w_ingredient_list: t.List[Dish],
+            ingredient_w_descr: Ingredient,
+            ingredient_wo_descr: Ingredient,
+            ingredient_list: t.List[Ingredient]
+    ):
+        assert Dish.objects.count() == 1
+        assert Ingredient.objects.count() == 5
+        # remove ingredient_wo_descr
+        # add ingredient_list - 3 шт
+        response = client.post(
+            reverse('dish_edit', kwargs={'pk': dish_w_ingredient_list.pk}),
+            data={
+                'csrfmiddlewaretoken': 'ZPNxsqWNh1Zt73WZJXICSHX7OOFGN5chiZDvzzRNLUaH2HLf1O61Wc5FrvniopI3',
+                'name': dish_w_ingredient_list.name,
+                'description': dish_w_ingredient_list.description,
+                'form-TOTAL_FORMS': 4,
+                'form-INITIAL_FORMS': 0,
+                'form-MIN_NUM_FORMS': 0,
+                'form-MAX_NUM_FORMS': 1000,
+                'form-0-ingredient_id': ingredient_w_descr.pk,
+                'form-0-ingredient_name': ingredient_w_descr.name,
+                'form-0-ingredient_amount': 200,
+                'form-0-ingredient_unit': ingredient_w_descr.unit.designation,
+                'form-1-ingredient_id': ingredient_list[0].pk,
+                'form-1-ingredient_name': ingredient_list[0].name,
+                'form-1-ingredient_amount': 150,
+                'form-1-ingredient_unit': ingredient_list[0].unit.designation,
+                'form-2-ingredient_id': ingredient_list[1].pk,
+                'form-2-ingredient_name': ingredient_list[1].name,
+                'form-2-ingredient_amount': 100,
+                'form-2-ingredient_unit': ingredient_list[1].unit.designation,
+                'form-3-ingredient_id': ingredient_list[2].pk,
+                'form-3-ingredient_name': ingredient_list[2].name,
+                'form-3-ingredient_amount': 55,
+                'form-3-ingredient_unit': ingredient_list[2].unit.designation,
+            }
+        )
+        assert response.status_code == 302
+        assert Dish.objects.count() == 1
+        dish = Dish.objects.get(pk=dish_w_ingredient_list.pk)
+        assert dish.name == dish_w_ingredient_list.name
+        assert dish.description == dish_w_ingredient_list.description
+        assert Ingredient.objects.count() == 5
+        assert dish.dishingredient_set.count() == 4
+        assert dish.dishingredient_set.filter(ingredient=ingredient_wo_descr).count() == 0
+
     # remove and edit ingredients
-    # ingredients reordering
+    def test_remove_one_edit_remaining_ingredient(
+            self,
+            client: Client,
+            dish_w_ingredient_list: Dish,
+            ingredient_w_descr: Ingredient,
+            ingredient_wo_descr: Ingredient
+    ):
+            assert Dish.objects.count() == 1
+            assert Ingredient.objects.count() == 2
+            response = client.post(
+                reverse('dish_edit', kwargs={'pk': dish_w_ingredient_list.pk}),
+                data={
+                    'csrfmiddlewaretoken': 'ZPNxsqWNh1Zt73WZJXICSHX7OOFGN5chiZDvzzRNLUaH2HLf1O61Wc5FrvniopI3',
+                    'name': dish_w_ingredient_list.name,
+                    'description': dish_w_ingredient_list.description,
+                    'form-TOTAL_FORMS': 1,
+                    'form-INITIAL_FORMS': 0,
+                    'form-MIN_NUM_FORMS': 0,
+                    'form-MAX_NUM_FORMS': 1000,
+                    'form-0-ingredient_id': ingredient_w_descr.pk,
+                    'form-0-ingredient_name': ingredient_w_descr.name,
+                    'form-0-ingredient_amount': 98,
+                    'form-0-ingredient_unit': ingredient_w_descr.unit.designation
+                }
+            )
+            assert response.status_code == 302
+            assert Dish.objects.count() == 1
+            dish = Dish.objects.get(pk=dish_w_ingredient_list.pk)
+            assert dish.name == dish_w_ingredient_list.name
+            assert dish.description == dish_w_ingredient_list.description
+            assert Ingredient.objects.count() == 2
+            assert dish.dishingredient_set.count() == 1
+            dish_ingredient = dish.dishingredient_set.first()
+            assert dish_ingredient.ingredient == ingredient_w_descr
+            assert dish_ingredient.amount == 98
+
+    def test_remove_edit_and_add_ingredients(
+            self,
+            client: Client,
+            dish_w_ingredient_list: t.List[Dish],
+            ingredient_w_descr: Ingredient,
+            ingredient_wo_descr: Ingredient,
+            ingredient_list: t.List[Ingredient]
+    ):
+        assert Dish.objects.count() == 1
+        assert Ingredient.objects.count() == 5
+        # remove ingredient_wo_descr
+        # add ingredient_list - 3 шт
+        response = client.post(
+            reverse('dish_edit', kwargs={'pk': dish_w_ingredient_list.pk}),
+            data={
+                'csrfmiddlewaretoken': 'ZPNxsqWNh1Zt73WZJXICSHX7OOFGN5chiZDvzzRNLUaH2HLf1O61Wc5FrvniopI3',
+                'name': dish_w_ingredient_list.name,
+                'description': dish_w_ingredient_list.description,
+                'form-TOTAL_FORMS': 4,
+                'form-INITIAL_FORMS': 0,
+                'form-MIN_NUM_FORMS': 0,
+                'form-MAX_NUM_FORMS': 1000,
+                'form-0-ingredient_id': ingredient_w_descr.pk,
+                'form-0-ingredient_name': ingredient_w_descr.name,
+                'form-0-ingredient_amount': 98,
+                'form-0-ingredient_unit': ingredient_w_descr.unit.designation,
+                'form-1-ingredient_id': ingredient_list[0].pk,
+                'form-1-ingredient_name': ingredient_list[0].name,
+                'form-1-ingredient_amount': 150,
+                'form-1-ingredient_unit': ingredient_list[0].unit.designation,
+                'form-2-ingredient_id': ingredient_list[1].pk,
+                'form-2-ingredient_name': ingredient_list[1].name,
+                'form-2-ingredient_amount': 100,
+                'form-2-ingredient_unit': ingredient_list[1].unit.designation,
+                'form-3-ingredient_id': ingredient_list[2].pk,
+                'form-3-ingredient_name': ingredient_list[2].name,
+                'form-3-ingredient_amount': 55,
+                'form-3-ingredient_unit': ingredient_list[2].unit.designation,
+            }
+        )
+        assert response.status_code == 302
+        assert Dish.objects.count() == 1
+        dish = Dish.objects.get(pk=dish_w_ingredient_list.pk)
+        assert dish.name == dish_w_ingredient_list.name
+        assert dish.description == dish_w_ingredient_list.description
+        assert Ingredient.objects.count() == 5
+        assert dish.dishingredient_set.count() == 4
+        assert dish.dishingredient_set.filter(ingredient=ingredient_wo_descr).count() == 0
+        dishingredient = dish.dishingredient_set.get(ingredient=ingredient_w_descr)
+        assert dishingredient.amount == 98
+
+    # TODO: ingredients reordering
 
 
 # delete
