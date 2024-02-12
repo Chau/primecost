@@ -43,6 +43,10 @@ class DishListTest:
 # create
 class DishCreateTest:
 
+    def test_get_create_page(self, client: Client):
+        response = client.get(reverse('dish_create'))
+        assert response.status_code == 200
+
     def test_add_dish_to_empty_db(
             self, client: Client, ingredient_list: t.List[Ingredient]
     ):
@@ -206,6 +210,32 @@ class DishCreateTest:
 
 # update
 class DishUpdateTest:
+
+    def test_get_404_page_on_empty_db(self, client: Client):
+        response = client.get(
+            reverse('dish_edit', kwargs={'pk': 10000})
+        )
+        assert response.status_code == 404
+
+    def test_get_404_on_not_empty_db(
+            self,
+            client: Client,
+            dish_w_ingredient: Dish
+    ):
+        response = client.get(
+            reverse('dish_edit', kwargs={'pk': 10000})
+        )
+        assert response.status_code == 404
+
+    def test_get_update_page(
+            self,
+            client: Client,
+            dish_w_ingredient: Dish
+    ):
+        response = client.get(
+            reverse('dish_edit', kwargs={'pk': dish_w_ingredient.pk})
+        )
+        assert response.status_code == 200
 
     def test_update_empty_db(self, client: Client):
         response = client.post(

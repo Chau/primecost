@@ -1,0 +1,61 @@
+<div class="modal fade" tabindex="-1" id="deleteModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <p class="modal-title">Удаление</p>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <h5 class="modal-question">Вы действительно хотите удалить блюдо?</h5>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="btnDelete" data-bs-pk="">Да</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+   var deleteModal = document.getElementById('deleteModal');
+   const modal = new bootstrap.Modal(deleteModal);
+    deleteModal.addEventListener('show.bs.modal', function(event){
+        var button = event.relatedTarget;
+        // var ingredientPk = button.getAttribute("data-bs-pk");
+        var deleteButton = deleteModal.querySelector("#btnDelete");
+        deleteButton.setAttribute("data-bs-pk", button.getAttribute("data-bs-pk"));
+        var dishName = button.getAttribute("data-bs-name");
+        deleteButton.setAttribute("data-bs-name", dishName);
+        var modalQuestion = deleteModal.querySelector(".modal-question");
+        modalQuestion.textContent = "Вы действительно хотите удалить блюдо '" + dishName +"'?";
+    });
+
+var deleteButton = document.getElementById('btnDelete');
+deleteButton.addEventListener('click', function(event){
+    var dishPk = deleteButton.getAttribute("data-bs-pk");
+    var dishName = deleteButton.getAttribute("data-bs-name");
+    const requestURL = "/dish/" + dishPk + "/delete_json";
+    modal.hide();
+   const xhr = new XMLHttpRequest();
+      xhr.responseType = 'json';
+      xhr.open('GET', requestURL);
+      xhr.onload = () => {
+          if (xhr.status !== 200) {
+            return;
+          }
+        dishJSON = xhr.response;
+        if (dishJSON['status'] == 'ok') {
+            alert("Блюдо " + dishName + " удалено.");
+            // remove item from ingredients list
+            var dishItemForDelete = document.getElementById("dishItem-" + dishPk);
+            dishItemForDelete.remove();
+            return;
+        } else {
+            alert(dishJSON['message']);
+            return;
+        }
+      }
+      xhr.send();
+});
+
+</script>

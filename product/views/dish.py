@@ -1,6 +1,6 @@
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
-from django.views.generic import DetailView, ListView, TemplateView
+from django.views.generic import DetailView, ListView, TemplateView, UpdateView
 
 from ..forms import IngredientFormset, DishForm
 from ..models import Dish
@@ -53,18 +53,15 @@ class DishCreateView(TemplateView):
         return redirect(dish)
 
 
-class DishUpdateView(TemplateView):
-    # TODO: Попробовать переделать на наследование от FormView
+class DishUpdateView(UpdateView):
     template_name = 'product/dish_form_update.html'
+    form_class = DishForm
+    model = Dish
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        dish_id = context['pk']
-        dish = Dish.objects.get(pk=dish_id)
-        context['dish'] = dish
-        # fill formset: {'ingredient_id': 1, 'ingredient_name': 'name', 'ingredient_amount': 2, 'ingredient_unit': 'шт'}
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
         ingredient_data = []
-        for dish_ingredient in dish.dishingredient_set.all():
+        for dish_ingredient in context['dish'].dishingredient_set.all():
             ingredient_data.append(
                     {
                         'ingredient_id': dish_ingredient.ingredient.id,
