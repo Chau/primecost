@@ -21,19 +21,20 @@
    const modal = new bootstrap.Modal(deleteModal);
     deleteModal.addEventListener('show.bs.modal', function(event){
         var button = event.relatedTarget;
-        // var ingredientPk = button.getAttribute("data-bs-pk");
         var deleteButton = deleteModal.querySelector("#btnDelete");
-        deleteButton.setAttribute("data-bs-pk", button.getAttribute("data-bs-pk"));
-        var dishName = button.getAttribute("data-bs-name");
+        deleteButton.setAttribute("data-bs-pk", button.dataset.bsPk);
+        var dishName = button.dataset.bsName;
         deleteButton.setAttribute("data-bs-name", dishName);
+        deleteButton.setAttribute("data-bs-func", button.dataset.bsFunc);
         var modalQuestion = deleteModal.querySelector(".modal-question");
         modalQuestion.textContent = "Вы действительно хотите удалить блюдо '" + dishName +"'?";
     });
 
 var deleteButton = document.getElementById('btnDelete');
 deleteButton.addEventListener('click', function(event){
-    var dishPk = deleteButton.getAttribute("data-bs-pk");
-    var dishName = deleteButton.getAttribute("data-bs-name");
+    var dishPk = deleteButton.dataset.bsPk;
+    var dishName = deleteButton.dataset.bsName;
+    var funcStr = deleteButton.dataset.bsFunc;
     const requestURL = "/dish/" + dishPk + "/delete_json";
     modal.hide();
    const xhr = new XMLHttpRequest();
@@ -46,9 +47,8 @@ deleteButton.addEventListener('click', function(event){
         dishJSON = xhr.response;
         if (dishJSON['status'] == 'ok') {
             alert("Блюдо " + dishName + " удалено.");
-            // remove item from ingredients list
-            var dishItemForDelete = document.getElementById("dishItem-" + dishPk);
-            dishItemForDelete.remove();
+            var f = Function(funcStr);
+            f();
             return;
         } else {
             alert(dishJSON['message']);
