@@ -38,7 +38,7 @@
           </svg>
         </button>
     </h4>
-    <p class="lead">{{ dish.description }}</p>
+    <pre class="lead">{{ dish.description }}</pre>
     <h5>Ингредиенты</h5>
     <ul class="list-group">
       {% for dish_ingredient in dish.dishingredient_set.all %}

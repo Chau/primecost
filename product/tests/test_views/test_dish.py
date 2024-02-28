@@ -96,6 +96,47 @@ class DishCreateTest:
         assert dish.description == 'Самый вкусный торт из Сибири'
         assert dish.ingredient.count() == 0
 
+
+    def test_add_dish_w_many_ingredients(
+            self,
+            client: Client,
+            many_ingredients_list: t.List[Ingredient]
+    ):
+        response = client.post(
+            reverse('dish_create'),
+            {
+                'name': 'Венгерский пирог',
+                'description': 'Насыпной яблочный пирог',
+                'form-TOTAL_FORMS': 5,
+                'form-INITIAL_FORMS': 0,
+                'form-MIN_NUM_FORMS': 0,
+                'form-MAX_NUM_FORMS': 1000,
+                'form-1-ingredient_id': 2001,
+                'form-1-ingredient_name': 'Молоко',
+                'form-1-ingredient_amount': 250,
+                'form-1-ingredient_unit': 'г',
+                'form-2-ingredient_id': 2002,
+                'form-2-ingredient_name': 'Сахар',
+                'form-2-ingredient_amount': 150,
+                'form-2-ingredient_unit': 'г',
+                'form-3-ingredient_id': 2003,
+                'form-3-ingredient_name': 'Манная крупа',
+                'form-3-ingredient_amount': 200,
+                'form-3-ingredient_unit': 'г',
+                'form-4-ingredient_id': 2004,
+                'form-4-ingredient_name': 'корица молотая',
+                'form-4-ingredient_amount': 5,
+                'form-4-ingredient_unit': 'г'
+            }
+        )
+        assert response.status_code == 302
+        assert Dish.objects.count() == 1
+        assert Ingredient.objects.count() == 4
+        dish = Dish.objects.first()
+        assert dish.name == 'Венгерский пирог'
+        assert dish.description == 'Насыпной яблочный пирог'
+        assert dish.ingredient.count() == 4
+
     def test_add_dish_to_not_empty_db(
             self,
             client: Client,
@@ -206,6 +247,34 @@ class DishCreateTest:
         )
         assert response.status_code == 302
         assert Dish.objects.count() == 0
+
+    def test_descr_w_crlf(
+            self,
+            client: Client,
+            ingredient_w_descr: Ingredient
+    ):
+        response = client.post(
+            reverse('dish_create'),
+            {
+                'name': 'Торт Байкал',
+                'description': 'Самый вкусный торт из Сибири. \r\n Рецепт: делай правильно, а\r\n неправильно не делай.',
+                'form-TOTAL_FORMS': 2,
+                'form-INITIAL_FORMS': 0,
+                'form-MIN_NUM_FORMS': 0,
+                'form-MAX_NUM_FORMS': 1000,
+                'form-1-ingredient_id': ingredient_w_descr.id,
+                'form-1-ingredient_name': ingredient_w_descr.name,
+                'form-1-ingredient_amount': 10,
+                'form-1-ingredient_unit': 'г',
+            }
+        )
+        assert response.status_code == 302
+        assert Dish.objects.count() == 1
+        assert Ingredient.objects.count() == 1
+        dish = Dish.objects.first()
+        assert dish.name == 'Торт Байкал'
+        assert dish.description == 'Самый вкусный торт из Сибири. \r\n Рецепт: делай правильно, а\r\n неправильно не делай.'
+        assert dish.ingredient.count() == 1
 
 
 # update

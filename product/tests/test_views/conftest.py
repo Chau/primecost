@@ -68,6 +68,42 @@ def ingredient_list(gramm_unit: MeasurementUnit) -> t.List[Ingredient]:
         ]
     )
 
+
+@pytest.fixture
+def many_ingredients_list(gramm_unit: MeasurementUnit) -> t.List[Ingredient]:
+    return Ingredient.objects.bulk_create(
+        [
+            Ingredient(
+                pk=2001,
+                name='Молоко',
+                unit=gramm_unit,
+                description='Описание для Молока',
+                price=0.06
+            ),
+            Ingredient(
+                pk=2002,
+                name='Сахар',
+                unit=gramm_unit,
+                description='Описание для Сахара',
+                price=0.058
+            ),
+            Ingredient(
+                pk=2003,
+                name='Манная крупа',
+                unit=gramm_unit,
+                description='Описание для Манной крупы',
+                price=0.05
+            ),
+            Ingredient(
+                pk=2004,
+                name='Корица',
+                unit=gramm_unit,
+                description='Описание для Корицы',
+                price=3
+            ),
+        ]
+    )
+
 # dishes
 @pytest.fixture
 def dish_wo_ingredients() -> Dish:
